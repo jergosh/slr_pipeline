@@ -1,0 +1,120 @@
+(dp0
+S'Laurasiatheria'
+p1
+(lp2
+Vmyotis lucifugus
+p3
+aVsorex araneus
+p4
+aVerinaceus europaeus
+p5
+aVtursiops truncatus
+p6
+aVbos taurus
+p7
+aVsus scrofa
+p8
+aVpteropus vampyrus
+p9
+aVequus caballus
+p10
+aVcanis familiaris
+p11
+aVmustela putorius furo
+p12
+aVvicugna pacos
+p13
+aVailuropoda melanoleuca
+p14
+aVfelis catus
+p15
+asS'Sauria'
+p16
+(lp17
+Vtaeniopygia guttata
+p18
+aVanolis carolinensis
+p19
+aVpelodiscus sinensis
+p20
+aVficedula albicollis
+p21
+aVanas platyrhynchos
+p22
+aVmeleagris gallopavo
+p23
+aVgallus gallus
+p24
+asS'Glires'
+p25
+(lp26
+Vmus musculus
+p27
+aVrattus norvegicus
+p28
+aVoryctolagus cuniculus
+p29
+aVdipodomys ordii
+p30
+aVictidomys tridecemlineatus
+p31
+aVcavia porcellus
+p32
+aVochotona princeps
+p33
+asS'Eutheria'
+p34
+(lp35
+g3
+ag4
+aVotolemur garnettii
+p36
+ag5
+aVdasypus novemcinctus
+p37
+ag6
+ag27
+ag7
+aVcholoepus hoffmanni
+p38
+ag8
+ag28
+ag9
+aVmicrocebus murinus
+p39
+ag10
+aVmacaca mulatta
+p40
+aVgorilla gorilla
+p41
+ag29
+aVechinops telfairi
+p42
+aVnomascus leucogenys
+p43
+aVhomo sapiens
+p44
+ag30
+ag11
+aVcallithrix jacchus
+p45
+aVpongo abelii
+p46
+ag12
+aVtarsius syrichta
+p47
+ag13
+ag31
+ag32
+ag33
+aVpan troglodytes
+p48
+ag14
+ag15
+aVprocavia capensis
+p49
+aVtupaia belangeri
+p50
+aVloxodonta africana
+p51
+as.

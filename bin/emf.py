@@ -1,4 +1,4 @@
-import dendropy
+import ete2
 # EMF just for iterating over the file
 # Push annotations to each node
 __all__ = [ "EMF" ]
@@ -43,23 +43,22 @@ class EMF:
 
             treedata.append(l)
 
-        tree = dendropy.Tree.get_from_string(''.join(treedata), schema='newick')
+        tree = ete2.Tree(''.join(treedata))
         
-        for l in tree.leaf_iter():
-            f = seqs[str(l.taxon)]
+        for l in tree.get_leaves():
+            f = seqs[str(l.name)]
             
-            l.annotations.add_new('species', f[1])
-            l.annotations.add_new('gene_id', f[7])
+            l.add_features(species=f[1].replace('_', ' '), gene_id=f[7])
 
         return tree
         
 
 # Test code
 if __name__ == "__main__":
-    emf = EMF("/Users/greg/Downloads/Compara.71.protein.nhx.emf")
+    emf = EMF("/Users/greg/Downloads/Compara.73.protein.nhx.emf")
 
     # it = iter(emf)
     # print type(it.next())
 
     for t in emf:
-        print t.leaf_nodes()[0].annotations.find(name="species").value
+        print t.get_leaves()[0].species
