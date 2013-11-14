@@ -36,6 +36,8 @@ class EMF:
             f = l.rstrip().split()
             seqs[f[2]] = f
 
+        if not len(seqs):
+            raise StopIteration
 
         for l in self._handle:
             if l.startswith("//"):
@@ -43,12 +45,12 @@ class EMF:
 
             treedata.append(l)
 
-        tree = ete2.Tree(''.join(treedata))
+        tree = ete2.Tree(''.join(treedata), format=1)
         
         for l in tree.get_leaves():
             f = seqs[str(l.name)]
             
-            l.add_features(species=f[1].replace('_', ' '), gene_id=f[7])
+            l.add_features(species=f[1].replace('_', ' ').lower(), gene_id=f[7])
 
         return tree
         

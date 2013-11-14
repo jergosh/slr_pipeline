@@ -1,3 +1,4 @@
+import os
 from os import path
 import sys
 import pickle
@@ -10,8 +11,6 @@ from pprint import pprint
 
 import ete2
 import emf
-from Bio import Entrez
-Entrez.email = "gregs@ebi.ac.uk"
 
 http = httplib2.Http(".cache")
 
@@ -99,7 +98,7 @@ class TCCList(object):
         return True
 
 def split_tree(tree, tcclist):
-    seqsets = []
+    seqsets, trees = [], []
     for node in tree.traverse("postorder"):
         children = node.get_children()
         if any([ n.done for n in children ]):
@@ -108,11 +107,12 @@ def split_tree(tree, tcclist):
             node.add_features(done=True)
             continue
 
-        if len(children) and all([ n.split for n in children ]):
-            print "Match", node.name
+        if len(children) and any([ n.split for n in children ]):
             seqset = []
             for ch in children:
-                seqsets.append([ (n.name, n.species) for n in ch.get_leaves() ])
+                if ch.split:
+                    seqsets.append([ (n.name, n.species) for n in ch.get_leaves() ])
+                    trees.append(ch)
             node.add_features(done=True)
         else:
             if tcclist.check(node):
@@ -122,8 +122,31 @@ def split_tree(tree, tcclist):
 
             node.add_features(done=False)
 
-    return seqsets
+    return seqsets, trees
 
+colours = { -1: "black", 0: "red", 1: "green", 2: "blue", 3: "purple", 4: "orange", 5: "yellow", 6: "grey", 7: "#009999",
+            8: "#FF7400"}
+def make_layout(nodesets):
+    nodemap = {}
+    for i, ns in enumerate(nodesets):
+        for n in ns:
+            nodemap[n[0]] = i
+
+    def layout(node):
+        if node.D == "Y":
+            node.img_style["shape"] = "circle"
+            node.img_style["size"] = 12
+            node.img_style["fgcolor"] = "red"
+
+        if node.is_leaf():
+            nameFace = ete2.faces.AttrFace("name", fsize=20, 
+                                           fgcolor=colours[nodemap.get(node.name, -1)])
+            ete2.faces.add_face_to_node(nameFace, node, column=0)
+            
+
+    return layout
+
+img_dir = "data/img"
 clades_pickle = "data/clades.pk"
 def main():
     all_species = ens_get("/info/species/")["species"]
@@ -134,7 +157,7 @@ def main():
         Clades = pickle.load(open(clades_pickle, 'rb'))
     else:
         Clades = filter_clades(all_species_names,
-                               [ "Eutheria", "Glires", "Laurasiatheria", "Sauria" ])
+                               [ "Eutheria", "Glires", "Laurasiatheria", "Sauria", "Mammalia" ])
         pickle.dump(Clades, open(clades_pickle, 'wb'))
 
     pprint(Clades)
@@ -142,8 +165,31 @@ def main():
     TL = TCCList()
     TL.add(TCC(Clades["Eutheria"], operator.ge, 0.6))
 
-    for tree in emf.EMF("/Users/greg/Downloads/Compara.73.protein.nhx.emf"):
-        seqsets = split_tree(tree, TL)
+    clade = "Eutheria"
+    outdir = path.join("data/ens/73/seqsets/", clade)
+    if not path.exists(outdir):
+        os.mkdir(outdir)
+
+    tree_id = 1
+    for tree in emf.EMF("data/Compara.73.protein.nhx.emf"):
+    # for tree in emf.EMF("/Users/greg/Downloads/Compara.nhx_trees.57.emf"):
+        seqsets, subtrees = split_tree(tree, TL)
+
+        # Treevis
+        # layout = make_layout(seqsets)
+        # imgfile = path.join(img_dir, "{}.pdf".format(tree_id))
+        # tree.render(imgfile, layout=layout)
+
+        set_id = 1
+        for seqset, subtree in zip(seqsets, subtrees):
+            outfile = open(path.join(outdir, "{}_{}.tab".format(tree_id, set_id)), 'w')
+            for seqid in seqset:
+                print >>outfile, '\t'.join(seqid)
+
+            subtree.write(outfile=path.join(outdir, "{}_{}.nh".format(tree_id, set_id)))
+            set_id += 1
+
+        tree_id += 1
 
 if __name__ == "__main__":
     main()
