@@ -10,8 +10,8 @@ alndir = "data/ens/73/aln"
 
 clades = [ "Eutheria" ]
 for clade in clades:
-    # for infile in glob(path.join(indir, "*.fa")):
-    for infile in glob(path.join(indir, clade, "*.fa"))[:2]:
+    for infile in glob(path.join(indir, "*.fa")):
+    # for infile in glob(path.join(indir, clade, "*.fa"))[:2]:
         basename = path.basename(infile).partition('.')[0]
 
         treefile = path.join(treedir, clade, basename + '.nh')
