@@ -22,30 +22,15 @@ for l in open(species_file):
 
 print >>sys.stderr, "Building the ID dictionary..."
 ## Build a mapping of Ens IDs to protein sequences 
-t2p = {} # Transcript to protein ID
-ens_pep_dir = path.join(pr_root, "data/ens/73/pep")
-for f in glob(path.join(ens_pep_dir, '*.all.fa')):
-    for seqr in SeqIO.parse(f, 'fasta'):
-        tr = transcript_RE.search(seqr.description)
-        if not tr:
-            print seqr.description
-            raise ValueError("Transcript ID not found in FASTA description field.")
-
-        tr_name = tr.groups()[0]
-        t2p[tr_name] = seqr.id
-
 ens_map = {}
-ens_cdna_dir = path.join(pr_root, "data/ens/73/cds/all")
-for f in glob(path.join(ens_cdna_dir, '*_cds.fa')):
+ens_cdna_dir = path.join(pr_root, "data/ens/73/pep")
+for f in glob(path.join(ens_cdna_dir, '*.pep.all.fa')):
     for seqr in SeqIO.parse(f, 'fasta'):
-        if seqr.id in t2p:
-            pid = t2p[seqr.id]
-
-            if pid in ens_map:
-                print "Duplicate id", pid
+        if seqr.id in ens_map:
+                print "Duplicate id", seqr.id
                 sys.exit(-1)
 
-            ens_map[pid] = seqr.seq
+            ens_map[seqr.id] = seqr.seq
 
 clades_pickle = "data/clades.pk"
 clades = pickle.load(open(clades_pickle))
@@ -53,7 +38,6 @@ clades = pickle.load(open(clades_pickle))
 indir = "data/ens/73/seqsets"
 outdir = "data/ens/73/tmp"
 clades = [ "Eutheria" ]
-
 
 
 for clade in clades:
