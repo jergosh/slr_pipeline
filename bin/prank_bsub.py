@@ -10,7 +10,7 @@ alndir = "data/ens/73/aln"
 
 clades = [ "Eutheria" ]
 for clade in clades:
-    for infile in glob(path.join(indir, "*.fa")):
+    for infile in glob(path.join(indir, clade, "*.fa")):
     # for infile in glob(path.join(indir, clade, "*.fa"))[:2]:
         basename = path.basename(infile).partition('.')[0]
 
@@ -18,6 +18,5 @@ for clade in clades:
         outfile = path.join(alndir, clade, basename + '_prank')
 
         prank = prank_cmd.format(infile, treefile, outfile)
-        print prank
         p = Popen(['bsub', '-o/dev/null', prank])
         p.wait()
