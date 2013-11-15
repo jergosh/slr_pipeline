@@ -7,6 +7,7 @@ prank_cmd = "prank -d={} -t={} -o={} -prunetree"
 indir = "data/ens/73/tmp"
 treedir = "data/ens/73/seqsets"
 alndir = "data/ens/73/aln"
+logdir = "log/prank"
 
 clades = [ "Eutheria" ]
 for clade in clades:
@@ -16,7 +17,9 @@ for clade in clades:
 
         treefile = path.join(treedir, clade, basename + '.nh')
         outfile = path.join(alndir, clade, basename + '_prank')
+        logfile = path.join(logdir, clade, basename + '.log')
+        errfile = path.join(logdir, clade, basename + '.err')
 
         prank = prank_cmd.format(infile, treefile, outfile)
-        p = Popen(['bsub', '-o/dev/null', prank])
+        p = Popen(['bsub', '-o'+logfile, prank])
         p.wait()
