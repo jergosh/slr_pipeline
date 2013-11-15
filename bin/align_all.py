@@ -27,10 +27,10 @@ ens_cdna_dir = path.join(pr_root, "data/ens/73/pep")
 for f in glob(path.join(ens_cdna_dir, '*.pep.all.fa')):
     for seqr in SeqIO.parse(f, 'fasta'):
         if seqr.id in ens_map:
-                print "Duplicate id", seqr.id
-                sys.exit(-1)
+            print "Duplicate id", seqr.id
+            sys.exit(-1)
 
-            ens_map[seqr.id] = seqr.seq
+        ens_map[seqr.id] = seqr.seq
 
 clades_pickle = "data/clades.pk"
 clades = pickle.load(open(clades_pickle))
