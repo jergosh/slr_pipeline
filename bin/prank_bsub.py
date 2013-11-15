@@ -19,5 +19,5 @@ for clade in clades:
 
         prank = prank_cmd.format(infile, treefile, outfile)
         print prank
-        p = Popen(['bsub', '-o /dev/null', prank])
+        p = Popen(['bsub', '-o/dev/null', prank])
         p.wait()
