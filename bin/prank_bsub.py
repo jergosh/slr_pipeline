@@ -7,7 +7,7 @@ prank_cmd = "prank -d={} -t={} -o={} -prunetree"
 pr_root = "/nfs/research2/goldman/gregs/slr_pipeline"
 indir = path.join(pr_root, "data/ens/73/tmp")
 treedir = path.join(pr_root, "data/ens/73/seqsets")
-alndir = path.join("data/ens/73/aln")
+alndir = path.join(pr_root, "data/ens/73/aln")
 logdir = path.join(pr_root, "log/prank")
 
 clades = [ "Eutheria" ]
