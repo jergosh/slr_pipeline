@@ -4,10 +4,11 @@ from os import path
 
 prank_cmd = "prank -d={} -t={} -o={} -prunetree"
 
-indir = "data/ens/73/tmp"
-treedir = "data/ens/73/seqsets"
-alndir = "data/ens/73/aln"
-logdir = "log/prank"
+pr_root = "/nfs/research2/goldman/gregs/slr_pipeline"
+indir = path.join(pr_root, "data/ens/73/tmp")
+treedir = path.join(pr_root, "data/ens/73/seqsets")
+alndir = path.join("data/ens/73/aln")
+logdir = path.join(pr_root, "log/prank")
 
 clades = [ "Eutheria" ]
 for clade in clades:
