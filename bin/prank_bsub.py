@@ -21,5 +21,5 @@ for clade in clades:
         errfile = path.join(logdir, clade, basename + '.err')
 
         prank = prank_cmd.format(infile, treefile, outfile)
-        p = Popen(['bsub', '-o'+logfile, prank])
+        p = Popen(['bsub', '-o'+logfile, '-cwd /tmp', prank])
         p.wait()
