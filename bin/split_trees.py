@@ -142,7 +142,6 @@ def make_layout(nodesets):
             nameFace = ete2.faces.AttrFace("name", fsize=20, 
                                            fgcolor=colours[nodemap.get(node.name, -1)])
             ete2.faces.add_face_to_node(nameFace, node, column=0)
-            
 
     return layout
 

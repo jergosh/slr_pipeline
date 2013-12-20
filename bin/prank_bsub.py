@@ -1,5 +1,6 @@
 from subprocess import Popen
 from glob import glob
+import os
 from os import path
 
 prank_cmd = "prank -d={} -t={} -o={} -prunetree"
@@ -17,10 +18,20 @@ for clade in clades:
         basename = path.basename(infile).partition('.')[0]
 
         treefile = path.join(treedir, clade, basename + '.nh')
-        outfile = path.join(alndir, clade, basename + '_prank')
-        logfile = path.join(logdir, clade, basename + '.log')
+
+        outdir = path.join(alndir, clade, basename[:2])
+        if not os.exists(outdir):
+            os.mkdir(outdir)
+        outfile = path.join(outdir, basename + '_prank')
+
+        if not os.exists(logdir):
+            os.mkdir(logdir)
+        logdir = path.join(logdir, clade, basename[:2])
+
+        logfile = path.join(logdir, basename + '.log')
         errfile = path.join(logdir, clade, basename + '.err')
 
         prank = prank_cmd.format(infile, treefile, outfile)
-        p = Popen(['bsub', '-o'+logfile, '-cwd /tmp', prank])
+        p = Popen(['bsub', '-R "rusage[tmp=512]"' '-o'+logfile, '-cwd /tmp',
+                   '-g /prank', prank])
         p.wait()
