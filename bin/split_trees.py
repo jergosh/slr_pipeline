@@ -15,6 +15,9 @@ import emf
 http = httplib2.Http(".cache")
 
 clade_dir = "data/clades"
+img_dir = "data/img"
+tree_root = "data/ens/73/trees"
+clades_pickle = "data/clades.pk"
 
 clade_names = [ "Eutheria" ]
 
@@ -97,32 +100,59 @@ class TCCList(object):
 
         return True
 
-def split_tree(tree, tcclist):
-    seqsets, trees = [], []
-    for node in tree.traverse("postorder"):
-        children = node.get_children()
-        if any([ n.done for n in children ]):
-            # if not all([ n.done for n in children ]):
-            #     print "Warning!"
-            node.add_features(done=True)
-            continue
+def split_tree(intree, tcclist):
+    seqsets, subtrees = [], []
 
-        if len(children) and any([ n.split for n in children ]):
-            seqset = []
-            for ch in children:
-                if ch.split:
-                    seqsets.append([ (n.name, n.species) for n in ch.get_leaves() ])
-                    trees.append(ch)
-            node.add_features(done=True)
-        else:
-            if tcclist.check(node):
-                node.add_features(split=True)
+    trees = []
+    to_remove = []
+    for node in intree.traverse("postorder"):
+        if node.dist > 100:
+            node.detach()
+            if len(node.get_descendants()) > 0:
+                trees.append(node)
+        # TODO: Does this do anything?
+        elif node.is_leaf() and not getattr(node, 'species', None):
+            print "REMOVING b/c of lack of species ann."
+            node.detach()
+
+    if len(intree.get_children()):
+        trees.append(intree)
+    # if len(to_remove):
+    #     print to_remove
+    #     for n in to_remove:
+    #         n.detach()
+
+    # TMP
+    for node in intree.get_leaves():
+        if not getattr(node, 'species', None):
+            print "MISSING SPECIES", node.name
+            print node.get_children()
+
+    for tree in trees:
+        for node in tree.traverse("postorder"):
+            children = node.get_children()
+            if any([ n.done for n in children ]):
+                # if not all([ n.done for n in children ]):
+                #     print "Warning!"
+                node.add_features(done=True)
+                continue
+
+            if len(children) and any([ n.split for n in children ]):
+                seqset = []
+                for ch in children:
+                    if ch.split:
+                        seqsets.append([ (n.name, n.species) for n in ch.get_leaves() ])
+                        subtrees.append(ch)
+                node.add_features(done=True)
             else:
-                node.add_features(split=False)
+                if tcclist.check(node):
+                    node.add_features(split=True)
+                else:
+                    node.add_features(split=False)
 
-            node.add_features(done=False)
+                node.add_features(done=False)
 
-    return seqsets, trees
+    return seqsets, subtrees
 
 colours = { -1: "black", 0: "red", 1: "green", 2: "blue", 3: "purple", 4: "orange", 5: "yellow", 6: "grey", 7: "#009999",
             8: "#FF7400"}
@@ -145,8 +175,6 @@ def make_layout(nodesets):
 
     return layout
 
-img_dir = "data/img"
-clades_pickle = "data/clades.pk"
 def main():
     all_species = ens_get("/info/species/")["species"]
     all_species_names = [ it["name"].replace("_", " ") for it in all_species ]
@@ -165,14 +193,24 @@ def main():
     TL.add(TCC(Clades["Eutheria"], operator.ge, 0.6))
 
     clade = "Eutheria"
-    outdir = path.join("data/ens/73/seqsets/", clade)
-    if not path.exists(outdir):
-        os.mkdir(outdir)
+    outroot = path.join("data/ens/73/seqsets/", clade)
+    if not path.exists(outroot):
+        os.mkdir(outroot)
 
     tree_id = 1
     for tree in emf.EMF("data/Compara.73.protein.nhx.emf"):
     # for tree in emf.EMF("/Users/greg/Downloads/Compara.nhx_trees.57.emf"):
+        print tree_id
+        treedir = path.join(tree_root, str(tree_id)[:2])
+        if not path.exists(treedir):
+            os.mkdir(treedir)
+
+        tree.write(outfile=path.join(treedir, "{}.nh".format(tree_id)))
+
         seqsets, subtrees = split_tree(tree, TL)
+        outdir = path.join(outroot, str(tree_id)[:2])
+        if not path.exists(outdir):
+            os.mkdir(outdir)
 
         # Treevis
         # layout = make_layout(seqsets)

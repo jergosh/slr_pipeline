@@ -1,5 +1,6 @@
 import sys
 import re 
+import os
 from os import path
 from glob import glob
 import pickle
@@ -21,27 +22,41 @@ for l in open(species_file):
 
 
 print >>sys.stderr, "Building the ID dictionary..."
-## Build a mapping of Ens IDs to protein sequences 
+t2p = {} # Transcript to protein ID
+ens_pep_dir = path.join(pr_root, "data/ens/73/pep")
+for f in glob(path.join(ens_pep_dir, '*.all.fa')):
+    print "Processing", f
+    for seqr in SeqIO.parse(f, 'fasta'):
+        tr = transcript_RE.search(seqr.description)
+        if not tr:
+            print seqr.description
+            raise ValueError("Transcript ID not found in FASTA description field.")
+
+        tr_name = tr.groups()[0]
+        t2p[tr_name] = seqr.id
+
+## Build a mapping of Ens IDs to coding sequences 
 ens_map = {}
-ens_cdna_dir = path.join(pr_root, "data/ens/73/pep")
-for f in glob(path.join(ens_cdna_dir, '*.pep.all.fa')):
+ens_cdna_dir = path.join(pr_root, "data/ens/73/cds/canonical")
+for f in glob(path.join(ens_cdna_dir, '*_cds.fa')):
+    print "Processing", f
     for seqr in SeqIO.parse(f, 'fasta'):
         if seqr.id in ens_map:
             print "Duplicate id", seqr.id
             sys.exit(-1)
 
-        ens_map[seqr.id] = seqr.seq
+        ens_map[t2p[seqr.id]] = seqr.seq
 
 clades_pickle = "data/clades.pk"
 clades = pickle.load(open(clades_pickle))
 
-indir = "data/ens/73/seqsets"
-outdir = "data/ens/73/tmp"
+inroot = "data/ens/73/seqsets"
+outroot = "data/ens/73/seqsets_cds"
 clades = [ "Eutheria" ]
 
 
 for clade in clades:
-    for seqset in glob(path.join(indir, clade, "*.tab")):
+    for seqset in glob(path.join(inroot, clade, "*", "*.tab")):
         setid = path.basename(seqset).rpartition('.')[0]
         seqs = []
         for l in open(seqset):
@@ -55,4 +70,8 @@ for clade in clades:
                 break
             seqs.append(SeqRecord(seq, id=seqid, description=""))
         else:
-            SeqIO.write(seqs, open(path.join(outdir, clade, setid + '.fa'), 'w'), 'fasta')
+            outdir =  path.join(outroot, clade, setid[:2])
+            if not path.exists(outdir):
+                os.mkdir(outdir)
+
+            SeqIO.write(seqs, open(path.join(outdir, setid + '.fa'), 'w'), 'fasta')
