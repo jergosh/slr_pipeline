@@ -12,6 +12,7 @@ from Bio.SeqRecord import SeqRecord
 
 argparser = ArgumentParser()
 
+argparser.add_argument('--clade', metavar='clade_name', type=str, required=True)
 argparser.add_argument('--cds', metavar='cds_dir', type=str, required=True)
 argparser.add_argument('--pep', metavar='pep_dir', type=str, required=True)
 argparser.add_argument('--inroot', metavar='inroot', type=str, required=True)
