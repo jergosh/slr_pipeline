@@ -3,9 +3,6 @@ from os import path
 import sys
 import pickle
 import operator
-import httplib2
-import urllib
-import json
 import time
 from pprint import pprint
 from argparse import ArgumentParser
@@ -26,7 +23,7 @@ args = argparser.parse_args()
 
 emf_file = args.emf
 out_root = args.outroot
-img_root = arg.imgroot
+img_root = args.imgroot
 tree_root = args.treeroot
 clades_pickle = "data/clades.pk"
 
