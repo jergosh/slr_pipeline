@@ -68,7 +68,7 @@ utils.check_dir(outroot)
 for seqset in glob(path.join(inroot, args.clade, "*", "*.tab")):
     setid = path.basename(seqset).rpartition('.')[0]
     seqs = []
-    utils.check(path.join(outroot, args.clade))
+    utils.check_dir(path.join(outroot, args.clade))
 
     for l in open(seqset):
         seqid, species = l.rstrip().split('\t')
