@@ -11,6 +11,9 @@ SEQSETS_CDS_ROOT=$(ENS_ROOT)/seqsets_cds
 CDS_DIR=$(ENS_ROOT)/cds/canonical
 PEP_DIR=$(ENS_ROOT)/pep
 
+ALN_ROOT=$(ENS_ROOT)/aln
+PRANK_LOG_ROOT=$(ENS_ROOT)/log/prank
+
 BSUB=bsub -I
 
 split_trees: $(EMF_FILE)
@@ -24,6 +27,8 @@ align_all: # split_trees $(wildcard $(SEQSETS_ROOT)/*/*)
 	--outroot $(SEQSETS_CDS_ROOT)
 
 prank: 
+	python bin/prank_bsub.py --clade $(CLADE) --inroot $(SEQSETS_CDS_ROOT) --treeroot $(TREE_ROOT) \
+	--outroot $(ALN_ROOT) --logdir $(PRANK_LOG_DIR)
 
 prepare_slr:
 

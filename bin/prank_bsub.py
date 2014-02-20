@@ -5,52 +5,57 @@ from os import path
 import argparse
 import re
 
+import utils
+
 segfault_RE = re.compile("core dumped") # For rerunning
 
 prank_cmd = "prank -d={} -t={} -o={} -prunetree -codon"
 
-pr_root = "/nfs/research2/goldman/gregs/slr_pipeline"
-inroot = path.join(pr_root, "data/ens/73/seqsets_cds")
-treeroot = path.join(pr_root, "data/ens/73/seqsets")
-alndir = path.join(pr_root, "data/ens/73/aln")
-logroot = path.join(pr_root, "log/prank")
-
 argparser = argparse.ArgumentParser()
+argparser.add_argument('--clade', metavar='clade_name', type=str, required=True)
+argparser.add_argument('--inroot', metavar='input_root', type=str, required=True)
+argparser.add_argument('--treeroot', metavar='tree_root', type=str, required=True)
+argparser.add_argument('--outroot', metavar='out_root', type=str, required=True)
+argparser.add_argument('--logdir', metavar='log_dir', type=str, required=True)
 argparser.add_argument('--rerun', action='store_true')
 
 args = argparser.parse_args()
 
-clades = [ "Eutheria" ]
-for clade in clades:
-    for infile in glob(path.join(inroot, clade, "*", "*.fa")):
-        print infile
-        basename = path.basename(infile).partition('.')[0]
+inroot = args.inroot
+treeroot = args.treeroot
+alndir = args.outroot
+logroot = args.logdir
 
-        treedir = path.join(treeroot, clade, basename[:2])
-        treefile = path.join(treedir, basename + '.nh')
+utils.check_dir(logroot)
+utils.check_dir(alndir)
 
-        outdir = path.join(alndir, clade, basename[:2])
-        if not path.exists(outdir):
-            os.mkdir(outdir)
-        outfile = path.join(outdir, basename + '_prank')
+for infile in glob(path.join(inroot, clade, "*", "*.fa")):
+    print infile
+    basename = path.basename(infile).partition('.')[0]
 
-        logdir = path.join(logroot, clade, basename[:2])
+    treedir = path.join(treeroot, clade, basename[:2])
+    treefile = path.join(treedir, basename + '.nh')
 
-        if not path.exists(logdir):
-            os.mkdir(logdir)
+    outdir = path.join(alndir, clade, basename[:2])
+    utils.check_dir(outdir)
+    outfile = path.join(outdir, basename + '_prank')
 
-        logfile = path.join(logdir, basename + '.log')
-        errfile = path.join(logdir, clade, basename + '.err')
+    logdir = path.join(logroot, clade, basename[:2])
 
-        prank = prank_cmd.format(infile, treefile, outfile)
+    os.check_dir(logdir)
 
-        if args.rerun:
-            if segfault_RE.search(open(logfile).read()) is None:
-                continue
-            else:
-                os.remove(logfile)
+    logfile = path.join(logdir, basename + '.log')
+    errfile = path.join(logdir, clade, basename + '.err')
 
-        p = Popen(['bsub', '-R', 'rusage[tmp=512]', '-o'+logfile, '-g', '/prank',
-                   '-cwd /tmp', prank])
+    prank = prank_cmd.format(infile, treefile, outfile)
+
+    if args.rerun:
+        if segfault_RE.search(open(logfile).read()) is None:
+            continue
+        else:
+            os.remove(logfile)
+
+    p = Popen(['bsub', '-R', 'rusage[tmp=512]', '-o'+logfile, '-g', '/prank',
+               '-cwd /tmp', prank])
         
-        p.wait()
+    p.wait()
