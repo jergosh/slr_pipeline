@@ -11,11 +11,12 @@ SEQSETS_CDS_ROOT=$(ENS_ROOT)/seqsets_cds
 CDS_DIR=$(ENS_ROOT)/cds
 PEP_DIR=$(ENS_ROOT)/pep
 
-BSUB=bsub 
+BSUB=bsub -I
 
 split_trees: $(EMF_FILE)
-	python bin/split_trees.py --emf $(EMF_FILE) --clade $(CLADE) --treeroot $(TREE_ROOT) \
+	$(BSUB) python bin/split_trees.py --emf $(EMF_FILE) --clade $(CLADE) --treeroot $(TREE_ROOT) \
 	--imgroot $(IMG_ROOT) --outroot $(SEQSETS_ROOT)
+
 
 align_all: split_trees $(wildcard $(SEQSETS_ROOT)/*/*)
 	python bin/align_all.py --cds $(CDS_DIR) --pep $(PEP_DIR) \
