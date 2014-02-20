@@ -32,7 +32,7 @@ for l in open(species_file):
 
 print >>sys.stderr, "Building the ID dictionary..."
 t2p = {} # Transcript to protein ID
-ens_pep_dir = path.join(pr_root, "data/ens/73/pep")
+ens_pep_dir = args.pep
 for f in glob(path.join(ens_pep_dir, '*.all.fa')):
     print "Processing", f
     for seqr in SeqIO.parse(f, 'fasta'):
@@ -46,7 +46,7 @@ for f in glob(path.join(ens_pep_dir, '*.all.fa')):
 
 ## Build a mapping of Ens IDs to coding sequences 
 ens_map = {}
-ens_cdna_dir = path.join(pr_root, "data/ens/73/cds/canonical")
+ens_cdna_dir = args.cds
 for f in glob(path.join(ens_cdna_dir, '*_cds.fa')):
     print "Processing", f
     for seqr in SeqIO.parse(f, 'fasta'):
