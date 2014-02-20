@@ -8,38 +8,27 @@ import urllib
 import json
 import time
 from pprint import pprint
+from argparse import ArgumentParser
 
 import ete2
 import emf
+import utils
 
-http = httplib2.Http(".cache")
+argparser = ArgumentParser()
 
-clade_dir = "data/clades"
-img_dir = "data/img"
-tree_root = "data/ens/73/trees"
+argparser.add_argument('--emf', metavar='emf_file', type=str, required=True)
+argparser.add_argument('--clade', metavar='clade_name', type=str, required=True)
+argparser.add_argument('--treeroot', metavar='tree_root', type=str, required=True)
+argparser.add_argument('--imgroot', metavar='img_root', type=str, required=True)
+argparser.add_argument('--outroot', metavar='out_root', type=str, required=True)
+
+args = argparser.parse_args()
+
+emf_file = args.emf
+out_root = args.outroot
+img_root = arg.imgroot
+tree_root = args.treeroot
 clades_pickle = "data/clades.pk"
-
-clade_names = [ "Eutheria" ]
-
-server = "http://beta.rest.ensembl.org/"
-def ens_get(ext, *args, **kwargs):
-    if len(args):
-        ext += '&'.join([ urllib.quote(a) for a in args]) 
-        
-    if len(kwargs):
-        ext += '&' + urllib.urlencode(kwargs)
-
-    print ext
-
-    resp, content = http.request(server+ext, method="GET", headers={"Content-Type":"application/json"})
-    
-    if not resp.status == 200:
-        exc = IOError(resp)
-        exc.errno = resp
-        raise exc
-
-    decoded = json.loads(content)
-    return decoded
 
 def filter_clades(species, clade_names):
     clade_names = set(clade_names)
@@ -61,7 +50,7 @@ def get_clades(sp):
         if parent not in clade_cache:
             if parent == "canis familiaris":
                 parent = "canis lupus familiaris"
-            sp_info = ens_get("taxonomy/id/", parent)
+            sp_info = utils.ens_get("taxonomy/id/", parent)
             clade_cache[parent] = sp_info
             time.sleep(0.33)
         else:
@@ -176,7 +165,7 @@ def make_layout(nodesets):
     return layout
 
 def main():
-    all_species = ens_get("/info/species/")["species"]
+    all_species = utils.ens_get("/info/species/")["species"]
     all_species_names = [ it["name"].replace("_", " ") for it in all_species ]
     all_species_names.remove("Ancestral sequences")
 
@@ -190,31 +179,28 @@ def main():
     pprint(Clades)
 
     TL = TCCList()
-    TL.add(TCC(Clades["Eutheria"], operator.ge, 0.6))
+    TL.add(TCC(Clades[args.clade], operator.ge, 0.6))
 
-    clade = "Eutheria"
-    outroot = path.join("data/ens/73/seqsets/", clade)
-    if not path.exists(outroot):
-        os.mkdir(outroot)
+    utils.check_dir(path.join(out_root, args.clade))
 
     tree_id = 1
-    for tree in emf.EMF("data/Compara.73.protein.nhx.emf"):
+    for tree in emf.EMF(emf_file):
     # for tree in emf.EMF("/Users/greg/Downloads/Compara.nhx_trees.57.emf"):
         print tree_id
         treedir = path.join(tree_root, str(tree_id)[:2])
-        if not path.exists(treedir):
-            os.mkdir(treedir)
+        utils.check_dir(treedir)
 
         tree.write(outfile=path.join(treedir, "{}.nh".format(tree_id)))
 
         seqsets, subtrees = split_tree(tree, TL)
-        outdir = path.join(outroot, str(tree_id)[:2])
-        if not path.exists(outdir):
-            os.mkdir(outdir)
+        outdir = path.join(out_root, args.clade, str(tree_id)[:2])
+        utils.check_dir(outdir)
 
         # Treevis
         # layout = make_layout(seqsets)
-        # imgfile = path.join(img_dir, "{}.pdf".format(tree_id))
+        # imgdir = path.join(img_root, args.clade)
+        # utils.check_dir(imgdir)
+        # imgfile = path.join(imgdir, "{}.pdf".format(tree_id))
         # tree.render(imgfile, layout=layout)
 
         set_id = 1

@@ -9,12 +9,20 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
+argparser = ArgumentParser()
+
+argparser.add_argument('--cds', metavar='cds_dir', type=str, required=True)
+argparser.add_argument('--pep', metavar='pep_dir', type=str, required=True)
+argparser.add_argument('--inroot', metavar='inroot', type=str, required=True)
+argparser.add_argument('--outroot', metavar='outroot', type=str, required=True)
+argparser.add_argument('--specieslist', metavar='species_file', type=str, required=True)
+
+args = argparser.parse_args()
+
 transcript_RE = re.compile("transcript:(\w+)")
 
-pr_root = "."
-
 all_species = []
-species_file = "data/specieslist.txt"
+species_file = args.specieslist
 for l in open(species_file):
     f = l.strip().split('\t')
     all_species.append(f[1].lower())
@@ -50,28 +58,26 @@ for f in glob(path.join(ens_cdna_dir, '*_cds.fa')):
 clades_pickle = "data/clades.pk"
 clades = pickle.load(open(clades_pickle))
 
-inroot = "data/ens/73/seqsets"
-outroot = "data/ens/73/seqsets_cds"
-clades = [ "Eutheria" ]
+inroot = args.inroot
+outroot = args.outroot
 
 
-for clade in clades:
-    for seqset in glob(path.join(inroot, clade, "*", "*.tab")):
-        setid = path.basename(seqset).rpartition('.')[0]
-        seqs = []
-        for l in open(seqset):
-            seqid, species = l.rstrip().split('\t')
-            if species not in all_species:
-                continue
+for seqset in glob(path.join(inroot, args.clade, "*", "*.tab")):
+    setid = path.basename(seqset).rpartition('.')[0]
+    seqs = []
+    for l in open(seqset):
+        seqid, species = l.rstrip().split('\t')
+        if species not in all_species:
+            continue
 
-            seq = ens_map.get(seqid)
-            if seq is None:
-                print seqid, "missing!"
-                break
-            seqs.append(SeqRecord(seq, id=seqid, description=""))
-        else:
-            outdir =  path.join(outroot, clade, setid[:2])
-            if not path.exists(outdir):
-                os.mkdir(outdir)
+        seq = ens_map.get(seqid)
+        if seq is None:
+            print seqid, "missing!"
+            break
+        seqs.append(SeqRecord(seq, id=seqid, description=""))
+    else:
+        outdir =  path.join(outroot, args.clade, setid[:2])
+        if not path.exists(outdir):
+            os.mkdir(outdir)
 
-            SeqIO.write(seqs, open(path.join(outdir, setid + '.fa'), 'w'), 'fasta')
+        SeqIO.write(seqs, open(path.join(outdir, setid + '.fa'), 'w'), 'fasta')
