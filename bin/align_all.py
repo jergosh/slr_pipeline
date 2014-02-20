@@ -4,7 +4,7 @@ import os
 from os import path
 from glob import glob
 import pickle
-from argparser import ArgumentParser
+from argparse import ArgumentParser
 
 from Bio import SeqIO
 from Bio.Seq import Seq
