@@ -170,7 +170,7 @@ def main():
         Clades = pickle.load(open(clades_pickle, 'rb'))
     else:
         Clades = filter_clades(all_species_names,
-                               [ "Eutheria", "Glires", "Laurasiatheria", "Sauria", "Mammalia" ])
+                               [ "Eutheria", "Glires", "Laurasiatheria", "Sauria", "Mammalia", "Primates" ])
         pickle.dump(Clades, open(clades_pickle, 'wb'))
 
     pprint(Clades)
