@@ -19,7 +19,7 @@ split_trees: $(EMF_FILE)
 
 
 align_all: # split_trees $(wildcard $(SEQSETS_ROOT)/*/*)
-	python bin/align_all.py --cds $(CDS_DIR) --pep $(PEP_DIR) \
+	python bin/align_all.py --clade $(CLADE) --cds $(CDS_DIR) --pep $(PEP_DIR) \
 	--specieslist $(SPECIES_LIST) --inroot $(SEQSETS_ROOT) \
 	--outroot $(SEQSETS_CDS_ROOT)
 
