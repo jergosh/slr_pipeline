@@ -8,7 +8,7 @@ TREE_ROOT=$(ENS_ROOT)/trees
 IMG_ROOT=$(ENS_ROOT)/img
 SEQSETS_ROOT=$(ENS_ROOT)/seqsets
 SEQSETS_CDS_ROOT=$(ENS_ROOT)/seqsets_cds
-CDS_DIR=$(ENS_ROOT)/cds
+CDS_DIR=$(ENS_ROOT)/cds/canonical
 PEP_DIR=$(ENS_ROOT)/pep
 
 BSUB=bsub -I
