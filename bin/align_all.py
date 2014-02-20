@@ -62,7 +62,7 @@ clades = pickle.load(open(clades_pickle))
 
 inroot = args.inroot
 outroot = args.outroot
-
+utils.check_dir(outroot)
 
 for seqset in glob(path.join(inroot, args.clade, "*", "*.tab")):
     setid = path.basename(seqset).rpartition('.')[0]
@@ -79,7 +79,6 @@ for seqset in glob(path.join(inroot, args.clade, "*", "*.tab")):
         seqs.append(SeqRecord(seq, id=seqid, description=""))
     else:
         outdir =  path.join(outroot, args.clade, setid[:2])
-        if not path.exists(outdir):
-            os.mkdir(outdir)
+        utils.check_dir(outdir)
 
         SeqIO.write(seqs, open(path.join(outdir, setid + '.fa'), 'w'), 'fasta')
