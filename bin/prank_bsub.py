@@ -29,23 +29,23 @@ logroot = args.logdir
 utils.check_dir(logroot)
 utils.check_dir(alndir)
 
-for infile in glob(path.join(inroot, clade, "*", "*.fa")):
+for infile in glob(path.join(inroot, args.clade, "*", "*.fa")):
     print infile
     basename = path.basename(infile).partition('.')[0]
 
-    treedir = path.join(treeroot, clade, basename[:2])
+    treedir = path.join(treeroot, args.clade, basename[:2])
     treefile = path.join(treedir, basename + '.nh')
 
-    outdir = path.join(alndir, clade, basename[:2])
+    outdir = path.join(alndir, args.clade, basename[:2])
     utils.check_dir(outdir)
     outfile = path.join(outdir, basename + '_prank')
 
-    logdir = path.join(logroot, clade, basename[:2])
+    logdir = path.join(logroot, args.clade, basename[:2])
 
     os.check_dir(logdir)
 
     logfile = path.join(logdir, basename + '.log')
-    errfile = path.join(logdir, clade, basename + '.err')
+    errfile = path.join(logdir, args.clade, basename + '.err')
 
     prank = prank_cmd.format(infile, treefile, outfile)
 
