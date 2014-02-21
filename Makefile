@@ -28,7 +28,7 @@ align_all: # split_trees $(wildcard $(SEQSETS_ROOT)/*/*)
 	--outroot $(SEQSETS_CDS_ROOT)
 
 prank: 
-	python bin/prank_bsub.py --clade $(CLADE) --inroot $(SEQSETS_CDS_ROOT) --treeroot $(TREE_ROOT) \
+	python bin/prank_bsub.py --clade $(CLADE) --inroot $(SEQSETS_CDS_ROOT) --treeroot $(SEQSETS_ROOT) \
 	--outroot $(ALN_ROOT) --logdir $(PRANK_LOG_DIR)
 
 prepare_slr:
