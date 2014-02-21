@@ -12,7 +12,7 @@ CDS_DIR=$(ENS_ROOT)/cds/canonical
 PEP_DIR=$(ENS_ROOT)/pep
 
 ALN_ROOT=$(ENS_ROOT)/aln
-PRANK_LOG_DIR=$(ENS_ROOT)/log/prank
+PRANK_LOG_DIR=log/prank
 
 BSUB=bsub -I
 
