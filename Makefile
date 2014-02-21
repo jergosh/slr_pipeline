@@ -2,8 +2,9 @@ PR_ROOT=.
 CLADE=Primates
 SPECIES_LIST=data/specieslist.txt
 
-ENS_ROOT=data/ens/73
-EMF_FILE=data/Compara.73.protein.nhx.emf
+PR_ROOT=`pwd`
+ENS_ROOT=$(PR_ROOT)/data/ens/73
+EMF_FILE=$(PR_ROOT)data/Compara.73.protein.nhx.emf
 TREE_ROOT=$(ENS_ROOT)/trees
 IMG_ROOT=$(ENS_ROOT)/img
 SEQSETS_ROOT=$(ENS_ROOT)/seqsets
@@ -12,7 +13,7 @@ CDS_DIR=$(ENS_ROOT)/cds/canonical
 PEP_DIR=$(ENS_ROOT)/pep
 
 ALN_ROOT=$(ENS_ROOT)/aln
-PRANK_LOG_DIR=log/prank
+PRANK_LOG_DIR=$(PR_ROOT)/log/prank
 
 BSUB=bsub -I
 
