@@ -27,6 +27,7 @@ alndir = args.outroot
 logroot = args.logdir
 
 utils.check_dir(logroot)
+utils.check_dir(path.join(logroot, args.clade))
 utils.check_dir(alndir)
 utils.check_dir(path.join(alndir, args.clade))
 
