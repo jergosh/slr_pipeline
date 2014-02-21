@@ -43,7 +43,7 @@ for infile in glob(path.join(inroot, args.clade, "*", "*.fa")):
 
     logdir = path.join(logroot, args.clade, basename[:2])
 
-    os.check_dir(logdir)
+    utils.check_dir(logdir)
 
     logfile = path.join(logdir, basename + '.log')
     errfile = path.join(logdir, args.clade, basename + '.err')
