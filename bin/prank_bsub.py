@@ -28,6 +28,7 @@ logroot = args.logdir
 
 utils.check_dir(logroot)
 utils.check_dir(alndir)
+utils.check_dir(path.join(alndir, args.clade))
 
 for infile in glob(path.join(inroot, args.clade, "*", "*.fa")):
     print infile
