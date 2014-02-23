@@ -47,7 +47,7 @@ prepare_slr:
 	--outroot $(SLR_ROOT)
 
 slr:
-	python bin/prepare_slr.py --clade $(CLADE) --slrroot $(SLR_ROOT) --logdir $(SLR_LOG_DIR)
+	python bin/slr_bsub.py --clade $(CLADE) --slrroot $(SLR_ROOT) --logdir $(SLR_LOG_DIR)
 
 process_slr:
 
