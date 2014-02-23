@@ -35,7 +35,7 @@ prank:
 	--outroot $(ALN_ROOT) --logdir $(PRANK_LOG_DIR)
 
 prepare_slr:
-	python bin/prepare_slr.py --clade $(CLADE) --treeroot $(SEQSETS_ROOT) --alnroot $(ALN_ROOT) \
+	$(BSUB) python bin/prepare_slr.py --clade $(CLADE) --treeroot $(SEQSETS_ROOT) --alnroot $(ALN_ROOT) \
 	--outroot $(SLR_ROOT)
 
 slr:

@@ -49,8 +49,8 @@ slrdir = args.outroot
 utils.check_dir(slrdir)
 utils.check_dir(path.join(slrdir, args.clade))
 
-# for infile in glob(path.join(alndir, args.clade, "*", "*_prank.best.fas")):
-for infile in glob(path.join(alndir, args.clade, "*", "*_prank.best.fas"))[:2]:
+for infile in glob(path.join(alndir, args.clade, "*", "*_prank.best.fas")):
+# for infile in glob(path.join(alndir, args.clade, "*", "*_prank.best.fas"))[:2]:
     basename = path.basename(infile).rpartition('_')[0]
 
     treedir = path.join(treeroot, args.clade, basename[:2])
