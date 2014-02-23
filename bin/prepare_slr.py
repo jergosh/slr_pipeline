@@ -47,6 +47,7 @@ alndir = args.alnroot
 slrdir = args.outroot
 
 utils.check_dir(slrdir)
+utils.check_dir(path.join(slrdir, args.clade))
 
 # for infile in glob(path.join(alndir, args.clade, "*", "*_prank.best.fas")):
 for infile in glob(path.join(alndir, args.clade, "*", "*_prank.best.fas"))[:2]:
