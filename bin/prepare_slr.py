@@ -75,9 +75,9 @@ for infile in glob(path.join(alndir, args.clade, "*", "*_prank.best.fas"))[:2]:
         if node.edge.length == 0:
             node.edge.length = 0.00001
         if node.is_leaf():
-            node.label = aln_ids[node.taxon.label]
+            node.taxon.label = aln_ids[node.taxon.label]
         else:
-            node.label = ""
+            node.taxon.label = ""
 
 
     pamlfile = open(path.join(outdir, basename + '_slr.paml'), 'w')
