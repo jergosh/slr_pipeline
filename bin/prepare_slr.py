@@ -38,17 +38,14 @@ argparser.add_argument('--clade', metavar='clade', type=str, required=True)
 argparser.add_argument('--treeroot', metavar='tree_root', type=str, required=True)
 argparser.add_argument('--alnroot', metavar='aln_root', type=str, required=True)
 argparser.add_argument('--outroot', metavar='out_root', type=str, required=True)
-argparser.add_argument('--logroot', metavar='log_root', type=str, required=True)
 
 args = argparser.parse_args()
 
 treeroot = args.treeroot
 alndir = args.alnroot
 slrdir = args.outroot
-logroot = args.logroot
 
 utils.check_dir(slrdir)
-utils.check_dir(logroot)
 
 # for infile in glob(path.join(alndir, args.clade, "*", "*_prank.best.fas")):
 for infile in glob(path.join(alndir, args.clade, "*", "*_prank.best.fas"))[:2]:
