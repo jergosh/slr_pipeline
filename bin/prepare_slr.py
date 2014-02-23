@@ -47,7 +47,7 @@ alndir = args.alnroot
 slrdir = args.outroot
 logroot = args.logroot
 
-args.check_dir(slrdir)
+utils.check_dir(slrdir)
 utils.check_dir(logroot)
 
 # for infile in glob(path.join(alndir, args.clade, "*", "*_prank.best.fas")):
@@ -58,7 +58,7 @@ for infile in glob(path.join(alndir, args.clade, "*", "*_prank.best.fas"))[:2]:
     treefile = path.join(treedir, basename + '.nh')
 
     outdir = path.join(slrdir, args.clade, basename[:2])
-    utils.checkdir(outdir)
+    utils.check_dir(outdir)
 
     fasta = [ f for f in SeqIO.parse(open(infile), 'fasta') ]
     tree = Tree.get_from_path(treefile, 'newick')
