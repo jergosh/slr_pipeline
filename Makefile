@@ -15,6 +15,9 @@ PEP_DIR=$(ENS_ROOT)/pep
 ALN_ROOT=$(ENS_ROOT)/aln
 PRANK_LOG_DIR=$(PR_ROOT)/log/prank
 
+SLR_ROOT=$(ENS_ROOT)/slr
+SLR_LOG_DIR=$(PR_ROOT)/slr
+
 BSUB=bsub -I
 
 split_trees: $(EMF_FILE)
@@ -32,6 +35,8 @@ prank:
 	--outroot $(ALN_ROOT) --logdir $(PRANK_LOG_DIR)
 
 prepare_slr:
+	python bin/prepare_slr.py --clade $(CLADE) --treeroot $(SEQSETS_ROOT) --alnroot $(ALN_ROOT) \
+	--outroot $(SLR_ROOT) --logroot $(SLR_LOG_DIR)
 
 slr:
 
