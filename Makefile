@@ -30,6 +30,14 @@ align_all: # split_trees $(wildcard $(SEQSETS_ROOT)/*/*)
 	--specieslist $(SPECIES_LIST) --inroot $(SEQSETS_ROOT) \
 	--outroot $(SEQSETS_CDS_ROOT)
 
+# Yeast analysis
+# Make Fasta files using the genomes and YGOB 'pillars' as guide
+# (Make alignments using PRANK)
+# (Run RAxML)
+# Make alignments using trees from Kevin
+
+
+# Here the Ensembl and yeast analyses merge
 prank: 
 	python bin/prank_bsub.py --clade $(CLADE) --inroot $(SEQSETS_CDS_ROOT) --treeroot $(SEQSETS_ROOT) \
 	--outroot $(ALN_ROOT) --logdir $(PRANK_LOG_DIR)
@@ -39,6 +47,7 @@ prepare_slr:
 	--outroot $(SLR_ROOT)
 
 slr:
+	python bin/prepare_slr.py --clade $(CLADE) --slrroot $(SLR_ROOT) --logdir $(SLR_LOG_DIR)
 
 process_slr:
 

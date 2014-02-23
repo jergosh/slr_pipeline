@@ -4,33 +4,35 @@ import os
 from os import path
 import argparse
 import re
+import utils
 
 slr_cmd = "/nfs/research2/goldman/gregs/sw/slr-1.4.1/bin/Slr {}"
 
-pr_root = "/nfs/research2/goldman/gregs/slr_pipeline"
-inroot = path.join(pr_root, "data/ens/73/slr")
-logroot = path.join(pr_root, "log/slr")
-
 argparser = argparse.ArgumentParser()
+
+argparser.add_argument('--clade', metavar='clade', type=str, required=True)
+argparser.add_argument('--slrroot', metavar='slr_root', type=str, required=True)
+argparser.add_argument('--logdir', metavar='log_dir', type=str, required=True)
+
 args = argparser.parse_args()
 
-clades = [ "Eutheria" ]
-for clade in clades:
-    for infile in glob(path.join(inroot, clade, "*", "*.ctl")):
-    # for infile in glob(path.join(inroot, clade, "*", "*.ctl"))[:10]:
-        basename = path.basename(infile)
+inroot = args.slrroot
+logroot = args.logdir
 
-        logdir = path.join(logroot, clade, basename[:2])
+# for infile in glob(path.join(inroot, args.clade, "*", "*.ctl")):
+for infile in glob(path.join(inroot, args.clade, "*", "*.ctl"))[:10]:
+    basename = path.basename(infile)
 
-        if not path.exists(logdir):
-            os.mkdir(logdir)
+    logdir = path.join(logroot, args.clade, basename[:2])
 
-        logfile = path.join(logdir, basename.rpartition('.')[0] + '.log')
-        # errfile = path.join(logdir, clade, basename + '.err')
+    utils.check_dir(logdir)
 
-        slr = slr_cmd.format(basename)
+    logfile = path.join(logdir, basename.rpartition('.')[0] + '.log')
+    # errfile = path.join(logdir, args.clade, basename + '.err')
 
-        p = Popen(['bsub', '-o'+logfile, '-g', '/slr',
-                   '-cwd', path.dirname(infile), slr])
+    slr = slr_cmd.format(basename)
+
+    p = Popen(['bsub', '-o'+logfile, '-g', '/slr',
+               '-cwd', path.dirname(infile), slr])
         
-        p.wait()
+    p.wait()
