@@ -3,6 +3,7 @@ import os
 from os import path
 import argparse
 import re
+import utils
 
 from dendropy import Tree
 from Bio import SeqIO
