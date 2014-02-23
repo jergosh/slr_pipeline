@@ -20,6 +20,7 @@ inroot = args.slrroot
 logroot = args.logdir
 
 utils.check_dir(logroot)
+utils.check_dir(path.join(logroot, args.clade))
 
 # for infile in glob(path.join(inroot, args.clade, "*", "*.ctl")):
 for infile in glob(path.join(inroot, args.clade, "*", "*.ctl"))[:10]:
