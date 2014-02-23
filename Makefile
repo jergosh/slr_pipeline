@@ -16,7 +16,7 @@ ALN_ROOT=$(ENS_ROOT)/aln
 PRANK_LOG_DIR=$(PR_ROOT)/log/prank
 
 SLR_ROOT=$(ENS_ROOT)/slr
-SLR_LOG_DIR=$(PR_ROOT)/slr
+SLR_LOG_DIR=$(PR_ROOT)/log/slr
 
 BSUB=bsub -I
 

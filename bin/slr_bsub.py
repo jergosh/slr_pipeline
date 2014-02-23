@@ -19,6 +19,8 @@ args = argparser.parse_args()
 inroot = args.slrroot
 logroot = args.logdir
 
+utils.check_dir(logroot)
+
 # for infile in glob(path.join(inroot, args.clade, "*", "*.ctl")):
 for infile in glob(path.join(inroot, args.clade, "*", "*.ctl"))[:10]:
     basename = path.basename(infile)
