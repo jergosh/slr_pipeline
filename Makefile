@@ -18,6 +18,8 @@ PRANK_LOG_DIR=$(PR_ROOT)/log/prank
 SLR_ROOT=$(ENS_ROOT)/slr
 SLR_LOG_DIR=$(PR_ROOT)/log/slr
 
+SLR_ALL = $(ENS_ROOT)/$(CLADE)_all.tab
+
 BSUB=bsub -I
 
 split_trees: $(EMF_FILE)
@@ -50,5 +52,7 @@ slr:
 	python bin/slr_bsub.py --clade $(CLADE) --slrroot $(SLR_ROOT) --logdir $(SLR_LOG_DIR)
 
 process_slr:
+	python bin/process_slr.py --clade $(CLADE) --slrroot $(SLR_ROOT) --alnroot $(ALN_ROOT) \
+	--outfile $(SLR_ALL)
 
 all: align_all

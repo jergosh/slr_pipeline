@@ -7,6 +7,7 @@ from Bio import AlignIO
 import pandas
 import sys
 import copy
+import argparse
 
 species_RE = re.compile("([A-Z]+)")
 
@@ -14,14 +15,19 @@ def grouper(iterable, n, fillvalue=None):
     args = [iter(iterable)] * n
     return itertools.izip_longest(*args, fillvalue=fillvalue)
 
-pr_root = "/nfs/research2/goldman/gregs/slr_pipeline"
-inroot = path.join(pr_root, "data/ens/73/seqsets_cds")
-treeroot = path.join(pr_root, "data/ens/73/seqsets")
-alndir = path.join(pr_root, "data/ens/73/aln")
-slrroot = path.join(pr_root, "data/ens/73/slr")
-slr_all = path.join(pr_root, "data/ens/73/slr_all.tab")
+argparser = argparse.ArgumentParser()
 
-logroot = path.join(pr_root, "log/prank")
+argparser.add_argument('--clade', metavar='clade', type=str, required=True)
+argparser.add_argument('--slrroot', metavar='slr_root', type=str, required=True)
+argparser.add_argument('--alnroot', metavar='aln_root', type=str, required=True)
+argparser.add_argument('--outfile', metavar='out_file', type=str, required=True)
+
+args = argparser.parse_args()
+
+clade = args.clade
+alndir = args.alnroot
+slrroot = args.slrroot
+slr_all = args.outfile
 
 colspecs = [(0, 8), (8, 17), (17, 25), (25, 34), (34, 43), (43, 51), (51, 60), (60, 71), (71, 82), (82, 92), (92, 99), (99, 111)]
 colnames = [ "dataset", "stable_id", "human_idx", "# Site", "Neutral", "Optimal", "Omega", "lower", "upper", "LRT_Stat", "Pval",
@@ -29,7 +35,6 @@ colnames = [ "dataset", "stable_id", "human_idx", "# Site", "Neutral", "Optimal"
 all_ids = []
 all_data = pandas.DataFrame(columns=colnames)
 
-clade = "Eutheria"
 for aln_fn in glob(path.join(alndir, clade, "*", "*_prank.best.fas")):
     basename = path.basename(aln_fn).rpartition('_')[0]
 
