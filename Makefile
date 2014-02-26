@@ -65,7 +65,7 @@ slr:
 	python bin/slr_bsub.py --clade $(CLADE) --slrroot $(SLR_ROOT) --logdir $(SLR_LOG_DIR)
 
 process_slr:
-	bsub - python bin/process_slr.py --clade $(CLADE) --slrroot $(SLR_ROOT) --alnroot $(ALN_ROOT) \
+	bsub -M 15000 -R "rusage[mem=15000]" python bin/process_slr.py --clade $(CLADE) --slrroot $(SLR_ROOT) --alnroot $(ALN_ROOT) \
 	--outfile $(SLR_ALL)
 
 all: align_all
