@@ -20,6 +20,8 @@ SLR_LOG_DIR=$(PR_ROOT)/log/slr
 
 SLR_ALL = $(ENS_ROOT)/$(CLADE)_all.tab
 
+
+
 BSUB=bsub -I
 
 split_trees: $(EMF_FILE)
@@ -31,6 +33,17 @@ align_all: # split_trees $(wildcard $(SEQSETS_ROOT)/*/*)
 	python bin/align_all.py --clade $(CLADE) --cds $(CDS_DIR) --pep $(PEP_DIR) \
 	--specieslist $(SPECIES_LIST) --inroot $(SEQSETS_ROOT) \
 	--outroot $(SEQSETS_CDS_ROOT)
+
+parse_yeast:
+	$(BSUB) python bin/yeast_make_seqsets.py 
+
+align_yeast:
+	python bin/prank_bsub.py --clade yeast --inroot $(PR_ROOT)/data/yeast/seqsets \
+	--outroot $(PR_ROOT)/data/yeast/aln1 --logdir $(PR_ROOT)/log/yeast/prank1
+
+phylo_yeast:
+	python bin/raxml_bsub.py --clade yeast --inroot $(PR_ROOT)/data/yeast/prank1 \
+	--outroot $(PR_ROOT)/data/yeast/trees --logdir $(PR_ROOT)/log/yeast/raxml
 
 # Yeast analysis
 # Make Fasta files using the genomes and YGOB 'pillars' as guide
@@ -52,7 +65,7 @@ slr:
 	python bin/slr_bsub.py --clade $(CLADE) --slrroot $(SLR_ROOT) --logdir $(SLR_LOG_DIR)
 
 process_slr:
-	$(BSUB) python bin/process_slr.py --clade $(CLADE) --slrroot $(SLR_ROOT) --alnroot $(ALN_ROOT) \
+	bsub - python bin/process_slr.py --clade $(CLADE) --slrroot $(SLR_ROOT) --alnroot $(ALN_ROOT) \
 	--outfile $(SLR_ALL)
 
 all: align_all
