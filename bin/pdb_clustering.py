@@ -72,16 +72,20 @@ chain_seq = ''.join([ SeqUtils.seq1(r.resname) for r in chain if SeqUtils.seq1(r
 print chain_seq
 print str(pdb_seq.seq.ungap('-'))
 
+r_coords = []
 residues = []
 for i, r in enumerate(chain):
     if float(omega_map[i][0]) > 1:
-        residues.append(r['CA'].get_coord())
+        r_coords.append(r['CA'].get_coord())
+        residues.append(''.join((str(_id) for _id in r.id)))
 
-residues = np.array(residues)
-af = AffinityPropagation().fit(residues)
+r_coords = np.array(r_coords)
+af = AffinityPropagation().fit(r_coords)
 labels = af.labels_
 
 palette = brewer2mpl.get_map('Spectral', 'Diverging', max(labels)+1)
 colorfile = open(args.colorfile, 'w')
-for i, l in enumerate(labels):
-    print >>colorfile, '\t'.join(str(it) for it in [i] + palette.colors[l])
+
+for i, r in enumerate(residues):
+    l = labels[i]
+    print >>colorfile, '\t'.join(str(it) for it in [r] + palette.colors[l])
