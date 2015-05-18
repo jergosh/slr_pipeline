@@ -21,7 +21,7 @@ DIVERGE_ALN_ROOT=$(ENS_ROOT)/aln_diverge
 HMMDIVERGE_ROOT=$(ENS_ROOT)/hmm_diverge
 CDS_DIR=$(ENS_ROOT)/cds
 PEP_DIR=$(ENS_ROOT)/pep
-PEP_HUMAN=$(PEP_DIR)/Homo_sapiens.GRCh38.$(ENS_VERSION).pep.all.fa
+PEP_HUMAN=$(PEP_DIR)/Homo_sapiens.GRCh38.pep.all.fa
 
 ALN_ROOT=$(ENS_ROOT)/aln
 PRANK_LOG_DIR=$(PR_ROOT)/log/prank
@@ -37,7 +37,10 @@ SLR_ALL=$(ENS_ROOT)/$(CLADE)_all.tab
 SIFTS_URL=ftp://ftp.ebi.ac.uk/pub/databases/msd/sifts/flatfiles/tsv/pdb_chain_uniprot.tsv.gz
 SIFTS_GZIP=$(PR_ROOT)/data/pdb_chain_uniprot.tsv.gz
 SIFTS_FILE=$(PR_ROOT)/data/pdb_chain_uniprot.tsv
-PDB_MAP_FILE=$(PR_ROOT)/data/pdb_map_$(CLADE).tab
+UNIPROT_SEQ_URL=ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz
+UNIPROT_SEQ_GZIP=$(PR_ROOT)/data/uniprot_sprot.fasta.gz
+UNIPROT_SEQ_FILE=$(PR_ROOT)/data/uniprot_sprot.fasta
+PDB_MAP_FILE=$(ENS_ROOT)/pdb_map_$(CLADE).tab
 PDB_STATS=$(PR_ROOT)/results/pdb_stats_$(CLADE).pdf
 PDB_LOG=$(PR_ROOT)/log/pdb_download.log
 PDB_MISMATCH_LOG=$(PR_ROOT)/log/pdb_mismatch.log
@@ -166,7 +169,7 @@ slr:
 
 process_slr:
 	$(BSUB) -M 15000 -R "rusage[mem=15000]" python bin/process_slr.py --clade $(CLADE) --slrroot $(SLR_ROOT) --alnroot $(ALN_ROOT) \
-	--outfile $(SLR_ALL)
+	--outfile $(SLR_ALL)_tmp
 
 all: align_all
 
@@ -186,6 +189,12 @@ get_pdb:
 	$(BSUB) python bin/get_pdb.py --pdbdir $(PDB_DIR) --pdbmap $(PDB_MAP_FILE) --log $(PDB_LOG) \
 	--mismatch_log $(PDB_MISMATCH_LOG) --missing_log $(PDB_MISSING_LOG)
 
-pdb_master_table:
-	$(BSUB) python bin/pdb_master_table_.py --clade $(CLADE) --pdbmap $(PDB_MAP_FILE) --pdbdir $(PDB_DIR) \
+$(UNIPROT_SEQ_GZIP):
+	curl $(UNIPROT_SEQ_URL) > $(UNIPROT_SEQ_GZIP)
+
+$(UNIPROT_SEQ_FILE): $(UNIPROT_SEQ_GZIP)
+	gunzip -c $(UNIPROT_SEQ_GZIP) > $(UNIPROT_SEQ_FILE)
+
+pdb_master_table: $(UNIPROT_SEQ_FILE)
+	$(BSUB) python bin/pdb_master_table.py --clade $(CLADE) --pdbmap $(PDB_MAP_FILE) --pdbdir $(PDB_DIR) \
 	--slrroot $(SLR_ROOT) --outfile $(PDB_MASTER_TABLE)
