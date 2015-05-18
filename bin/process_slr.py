@@ -33,7 +33,7 @@ slrroot = args.slrroot
 slr_all = args.outfile
 
 all_ids = []
-all_data = pandas.DataFrame(columns=colnames)
+all_data = [] # pandas.DataFrame(columns=colnames)
 
 for aln_fn in glob(path.join(alndir, clade, "*", "*_prank.best.fas")):
     basename = path.basename(aln_fn).rpartition('_')[0]
@@ -46,8 +46,10 @@ for aln_fn in glob(path.join(alndir, clade, "*", "*_prank.best.fas")):
         continue
 
     # TODO Make sure colspecs work in all cases
-    slr = pandas.read_fwf(open(slr_fn), colspecs=colspecs, header=False, comment="\n")
+    slr = pandas.read_fwf(open(slr_fn), colspecs=colspecs, header=False, comment="\n", )
 
+    # What if there are multiple human IDs in a single (split) tree? 
+    # Are we allowed to potentially double count things like that?
     aln = AlignIO.read(aln_fn, 'fasta')
     for seqr in aln:
         if args.clade == "yeast":
@@ -69,11 +71,14 @@ for aln_fn in glob(path.join(alndir, clade, "*", "*_prank.best.fas")):
 
         # slr_subset.insert(0, 'dataset', pandas.Series([basename]*slr_subset.shape[0]))
         # slr_subset.insert(0, 'stable_id', pandas.Series([seqr.id]*slr_subset.shape[0]))
-        slr_subset['dataset'] = pandas.Series([basename]*slr.shape[0])
-        slr_subset['stable_id'] = pandas.Series([seqr.id]*slr.shape[0])
-        slr_subset['human_idx'] = pandas.Series(range(1, slr.shape[0]+1))
+        slr_subset['dataset'] = pandas.Series([basename]*slr_subset.shape[0], index=slr_subset.index)
+        slr_subset['stable_id'] = pandas.Series([seqr.id]*slr_subset.shape[0], index=slr_subset.index)
+        slr_subset['human_idx'] = pandas.Series(range(1, slr_subset.shape[0]+1), index=slr_subset.index)
 
-        all_data = all_data.append(slr_subset)
+        all_data.append(slr_subset)
 
+all_data = pandas.concat(all_data)
 all_data.rename(columns={"# Site": "Site"}, inplace=True)
 all_data.to_csv(slr_all, quoting=False, index=False, sep='\t')
+
+print min(all_data["Pval"]), max(all_data["Pval"])
