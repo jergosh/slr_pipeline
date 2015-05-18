@@ -1,3 +1,3 @@
-colspecs = [(0, 8), (8, 17), (17, 25), (25, 34), (34, 43), (43, 51), (51, 60), (60, 71), (71, 82), (82, 92), (92, 99), (99, 111)]
+colspecs = [(0, 7), (8, 16), (17, 24), (25, 33), (34, 42), (43, 50), (51, 59), (60, 70), (71, 81), (82, 91), (92, 98), (99, 111)]
 colnames = [ "dataset", "stable_id", "human_idx", "# Site", "Neutral", "Optimal", "Omega", "lower", "upper", "LRT_Stat", "Pval",
              "Adj.Pval", "Q-value", "Result", "Note" ]
