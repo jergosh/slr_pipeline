@@ -26,7 +26,6 @@ params = {
 'format':'tab',
 'query': ' '.join(all_ids)
 }
-print params
 
 data = urllib.urlencode(params)
 request = urllib2.Request(url, data)
@@ -36,7 +35,6 @@ response = urllib2.urlopen(request)
 response.readline() # Skip header
 for l in response:
     f = l.rstrip().split()
-    print f
     id_map[f[1]] = f[0]
 
 
@@ -51,21 +49,29 @@ sifts_file.readline() # Skip header
 for l in sifts_file:
     f = l.rstrip().split('\t')
     if f[2] not in id_map:
-        print "Skipping", f[2]
+        # print "Skipping", f[2]
         continue
 
-    if f[2] in sp2pdb:
-        pdb_len = int(f[4]) - int(f[3])
-        pdb_len_old = int(sp2pdb[f[2]][4]) - int(sp2pdb[f[2]][3])
-        if pdb_len > pdb_len_old:
-            print "Replacing", sp2pdb[f[2]][0], "with", 
-            sp2pdb[ id_map[f[2]] ] = f
-    else:
-        sp2pdb[ id_map[f[2]] ] = f
+    # if f[2] in sp2pdb:
+    #     pdb_len = int(f[4]) - int(f[3])
+    #     pdb_len_old = int(sp2pdb[f[2]][4]) - int(sp2pdb[f[2]][3])
+    #     if pdb_len > pdb_len_old:
+    #         print "Replacing", sp2pdb[f[2]][0], "with", 
+    #         sp2pdb[ id_map[f[2]] ] = f
+    # else:
+    #     sp2pdb[ id_map[f[2]] ] = f
 
-for i in sp2pdb.items():
-    print >>out_file, '\t'.join([ i[0] ] + i[1])
+# for i in sp2pdb.items():
+#     print >>out_file, '\t'.join([ i[0] ] + i[1])
+
+    # New way of generating the map without making any decisions as to what the best 
+    # structure is.
+    sp2pdb[ id_map[f[2]] ] = f
+    print >>out_file, '\t'.join([ id_map[ f[2]] ] + f)
 
 # TODO Could work out which Ensembl IDs didn't get a mapping from Uniprot
 # -- By set difference for example.
-print len(set(all_ids).difference(sp2pdb.keys()))
+print "All IDs", len(all_ids)
+print "ID map", len(id_map)
+print "SP2PDB", len(sp2pdb.keys())
+print "all IDs - SP2PDB", len(set(all_ids).difference(sp2pdb.keys()))
