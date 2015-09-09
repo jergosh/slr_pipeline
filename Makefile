@@ -1,4 +1,4 @@
-CLADE=Eutheria
+	CLADE=Eutheria
 # CLADE=Primates
 # CLADE=yeast
 SPECIES_LIST=data/specieslist.txt
