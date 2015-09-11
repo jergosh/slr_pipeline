@@ -4,6 +4,7 @@ import httplib2
 import urllib
 import json
 from itertools import izip_longest
+
 import re
 import pprint
 
@@ -16,7 +17,7 @@ def check_dir(dirname):
 # Ensembl REST API stuff
 http = httplib2.Http(".cache")
 
-server = "http://beta.rest.ensembl.org/"
+server = "http://rest.ensembl.org/"
 def ens_get(ext, *args, **kwargs):
     if len(args):
         ext += '&'.join([ urllib.quote(a) for a in args]) 

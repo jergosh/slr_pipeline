@@ -18,14 +18,9 @@ argparser.add_argument('--clade', metavar='clade_name', type=str, required=True)
 argparser.add_argument('--treeroot', metavar='tree_root', type=str, required=True)
 argparser.add_argument('--imgroot', metavar='img_root', type=str, required=True)
 argparser.add_argument('--outroot', metavar='out_root', type=str, required=True)
+argparser.add_argument('--species_cache', metavar='cache_file', type=str, required=True)
+argparser.add_argument('--thr', metavar='value', type=float, default=0.6)
 
-args = argparser.parse_args()
-
-emf_file = args.emf
-out_root = args.outroot
-img_root = args.imgroot
-tree_root = args.treeroot
-clades_pickle = "data/clades.pk"
 
 def filter_clades(species, clade_names):
     clade_names = set(clade_names)
@@ -162,6 +157,14 @@ def make_layout(nodesets):
     return layout
 
 def main():
+    args = argparser.parse_args()
+
+    emf_file = args.emf
+    out_root = args.outroot
+    img_root = args.imgroot
+    tree_root = args.treeroot
+    clades_pickle = args.species_cache
+
     all_species = utils.ens_get("/info/species/")["species"]
     all_species_names = [ it["name"].replace("_", " ") for it in all_species ]
     all_species_names.remove("Ancestral sequences")
@@ -176,13 +179,12 @@ def main():
     pprint(Clades)
 
     TL = TCCList()
-    TL.add(TCC(Clades[args.clade], operator.ge, 0.6))
+    TL.add(TCC(Clades[args.clade], operator.ge, args.thr))
 
     utils.check_dir(path.join(out_root, args.clade))
 
     tree_id = 1
     for tree in emf.EMF(emf_file):
-    # for tree in emf.EMF("/Users/greg/Downloads/Compara.nhx_trees.57.emf"):
         print tree_id
         treedir = path.join(tree_root, str(tree_id)[:2])
         utils.check_dir(treedir)
@@ -206,7 +208,8 @@ def main():
             for seqid in seqset:
                 print >>outfile, '\t'.join(seqid)
 
-            subtree.write(outfile=path.join(outdir, "{}_{}.nh".format(tree_id, set_id)))
+            subtree.write(outfile=path.join(outdir, "{}_{}.nh".format(tree_id, set_id)), 
+                          format=6)
             set_id += 1
 
         tree_id += 1

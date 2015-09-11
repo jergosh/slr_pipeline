@@ -50,17 +50,21 @@ utils.check_dir(slrdir)
 utils.check_dir(path.join(slrdir, args.clade))
 
 for infile in glob(path.join(alndir, args.clade, "*", "*_prank.best.fas")):
-# for infile in glob(path.join(alndir, args.clade, "*", "*_prank.best.fas"))[:2]:
+    print infile
     basename = path.basename(infile).rpartition('_')[0]
+    prefix = basename.partition('_')[0][:2]
 
-    treedir = path.join(treeroot, args.clade, basename[:2])
+    # treedir = path.join(treeroot, args.clade, prefix)
+    treedir = path.join(treeroot, args.clade, prefix)
     treefile = path.join(treedir, basename + '.nh')
+    # FIXME This is presumably for yeast
+    # treefile = path.join(treedir, 'RAxML_result.' + basename)
 
-    outdir = path.join(slrdir, args.clade, basename[:2])
+    outdir = path.join(slrdir, args.clade, prefix)
     utils.check_dir(outdir)
 
     fasta = [ f for f in SeqIO.parse(open(infile), 'fasta') ]
-    tree = Tree.get_from_path(treefile, 'newick')
+    tree = Tree.get_from_path(treefile, 'newick', preserve_underscores=True)
 
     matched_ids = match_ids(tree, fasta)
     tree.retain_taxa_with_labels(matched_ids)
