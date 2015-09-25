@@ -1,0 +1,35 @@
+Cow	Bos taurus		ENSBTA
+Dog	Canis familiaris	ENSCAF
+Guinea Pig	Cavia porcellus		ENSCPO
+Sloth	Choloepus hoffmanni	ENSCHO
+Armadillo	Dasypus novemcinctus	ENSDNO
+Kangaroo Rat	Dipodomys ordii		ENSDOR
+Tenrec	Echinops telfairi	ENSETE
+Horse	Equus caballus		ENSECA
+Hedgehog	Erinaceus europaeus	ENSEEU
+Cat	Felis catus		ENSFCA
+Human	Homo sapiens		ENS
+Squirrel	Ictidomys tridecemlineatus	ENSSTO
+Elephant	Loxodonta africana	ENSLAF
+Macaque	Macaca mulatta		ENSMMU
+Mouse Lemur	Microcebus murinus	ENSMIC
+Mouse	Mus musculus		ENSMUS
+Microbat	Myotis lucifugus	ENSMLU
+Pika	Ochotona princeps	ENSOPR
+Rabbit	Oryctolagus cuniculus	ENSOCU
+Chimp	Pan troglodytes		ENSPTR
+Hyrax	Procavia capensis	ENSPCA
+Megabat	Pteropus vampyrus	ENSPVA
+Rat	Rattus norvegicus	ENSRNO
+Shrew	Sorex araneus		ENSSAR
+Pig	Sus scrofa		ENSSSC
+Tarsier	Tarsius syrichta	ENSTSY
+Tree Shrew	Tupaia belangeri	ENSTBE
+Bottlenose dolphin	Tursiops truncatus	ENSTTR
+Alpaca	Vicugna pacos	ENSVPA
+Gorilla	Gorilla gorilla	ENSGGO
+Orangutan	Pongo abelii	ENSPPY
+Panda	Ailuropoda melanoleuca	ENSAME
+Marmoset	Callithrix jacchus	ENSCJA
+Gibbon	Nomascus leucogenys	ENSNLE
+Ferret	Mustela putorius furo	ENSMPU
