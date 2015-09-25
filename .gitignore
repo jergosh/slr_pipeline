@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+.Rproj.user
+.Rhistory
+.RData
+=======
 # Custom
 [#]*[#]
 *~
@@ -56,3 +61,4 @@ docs/_build/
 
 # PyBuilder
 target/
+>>>>>>> cbd40e6069143f92b28bb97bd6334b453c6d86af

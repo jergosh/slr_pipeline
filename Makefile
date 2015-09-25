@@ -157,7 +157,6 @@ realign_yeast:
 	--treeroot $(PR_ROOT)/data/yeast/trees \
 	--outroot $(PR_ROOT)/data/yeast/aln --logdir $(PR_ROOT)/log/yeast/prank
 
-
 # Here the Ensembl and yeast analyses merge
 # TODO Add dependencies
 prank: 
