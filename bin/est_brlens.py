@@ -2,6 +2,7 @@ import glob
 import argparse
 import sys
 from os import path
+from subprocess import Popen
 
 import ete2
 from Bio import SeqIO
