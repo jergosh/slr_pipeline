@@ -47,7 +47,7 @@ def main():
         aln_fn = path.abspath(path.join(args.domaindir, prefix,
                                          stable_id+'_'+dataset+'.fa'))
         aln = SeqIO.to_dict(SeqIO.parse(aln_fn, 'fasta'))
-        outtree_fn = path.join(args.outdir, prefix, dataset+'.nh')
+        outtree_fn = path.abspath(path.join(args.outdir, prefix, dataset+'.nh'))
         
         utils.check_dir(path.join(args.outdir, prefix))
 
