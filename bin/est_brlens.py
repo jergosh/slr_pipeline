@@ -55,7 +55,7 @@ def main():
 
         logfile = path.join(args.outdir, prefix, dataset+'.log')
 
-        raxml = raxml_cmd.format(tree_fn, aln_fn, dataset)
+        raxml = raxml_cmd.format(outtree_fn, aln_fn, dataset)
         p = Popen(['bsub', '-o'+logfile, '-n 2', # '-g', '/slr',
                    '-cwd', args.outdir, raxml])
         p.wait()
