@@ -36,7 +36,10 @@ def main():
   
     for l in open(args.cath_map):
         stable_id, ranges, cath_id, pdb_id = l.rstrip().split('\t')
-        dataset = dataset_map[stable_id]
+        dataset = dataset_map.get(stable_id)
+        if dataset is None:
+            print >>sys.stderr, "Skipping", stable_id
+            continue
         prefix = dataset.partition('_')[0][:2]
         intree = ete2.Tree(path.join(args.treedir, prefix, dataset+'.nh'))
         aln_fn = path.absolute(path.join(args.domaindir, prefix,
