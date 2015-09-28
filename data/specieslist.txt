@@ -29,7 +29,7 @@ Bottlenose dolphin	Tursiops truncatus	ENSTTR
 Alpaca	Vicugna pacos	ENSVPA
 Gorilla	Gorilla gorilla	ENSGGO
 Orangutan	Pongo abelii	ENSPPY
-Panda		Ailuropoda melanoleuca	ENSAME
+Panda	Ailuropoda melanoleuca	ENSAME
 Marmoset	Callithrix jacchus	ENSCJA
-Gibbon		Nomascus leucogenys	ENSNLE
-Ferret		Mustela putorius furo	ENSMPU
+Gibbon	Nomascus leucogenys	ENSNLE
+Ferret	Mustela putorius furo	ENSMPU

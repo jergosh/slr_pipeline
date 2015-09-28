@@ -15,6 +15,7 @@ TREE_ROOT=$(ENS_ROOT)/trees
 IMG_ROOT=$(ENS_ROOT)/img
 SEQSETS_ROOT=$(ENS_ROOT)/seqsets
 SEQSETS_CDS_ROOT=$(ENS_ROOT)/seqsets_cds
+SEQSETS_PEP_ROOT=$(ENS_ROOT)/seqsets_pep
 DIVERGE_ROOT=$(ENS_ROOT)/diverge
 DIVERGE_SEQSETS_ROOT=$(ENS_ROOT)/diverge_seqsets_cds
 DIVERGE_ALN_ROOT=$(ENS_ROOT)/aln_diverge
@@ -94,6 +95,11 @@ split_trees: $(EMF_FILE)
 make_seqsets: # split_trees $(wildcard $(SEQSETS_ROOT)/*/*)
 	python bin/make_seqsets.py --clade $(CLADE) --cds $(CDS_DIR) --pep $(PEP_DIR) \
 	--inroot $(SEQSETS_ROOT) --outroot $(SEQSETS_CDS_ROOT) --species_cache $(SPECIES_CACHE)
+
+make_seqsets_pep: # split_trees $(wildcard $(SEQSETS_ROOT)/*/*)
+	python bin/make_seqsets_pep.py --clade $(CLADE) --pep $(PEP_DIR) \
+	--inroot $(SEQSETS_ROOT) --outroot $(SEQSETS_PEP_ROOT) --species_cache $(SPECIES_CACHE) \
+	--specieslist data/specieslist.txt
 
 # Nonessential
 split_trees_nofilter: $(EMF_FILE)
@@ -197,3 +203,7 @@ $(UNIPROT_SEQ_FILE): $(UNIPROT_SEQ_GZIP)
 pdb_master_table: $(UNIPROT_SEQ_FILE)
 	$(BSUB) python bin/pdb_master_table.py --clade $(CLADE) --pdbmap $(PDB_MAP_FILE) --pdbdir $(PDB_DIR) \
 	--slrroot $(SLR_ROOT) --outfile $(PDB_MASTER_TABLE)
+
+# python bin/parse_sifts.py --clade Eutheria --pdbmap /nfs/research2/goldman/gregs/slr_pipeline/data/ens/78/pdb_map_Eutheria.tab --pdbdir /nfs/research2/goldman/gregs/slr_pipeline/data/pdb --slrroot /nfs/research2/goldman/gregs/slr_pipeline/data/ens/78/slr --outfile /nfs/research2/goldman/gregs/slr_pipeline/data/pdb_master_table_Eutheria.tab --siftsdir data/sifts
+
+# bsub -I -M 20000 -R "rusage[mem=30000]" python bin/run_dssp.py --clade Eutheria --siftsmap /nfs/research2/goldman/gregs/slr_pipeline/data/pdb_master_table_Eutheria.tab --pdbdir /nfs/research2/goldman/gregs/slr_pipeline/data/pdb --slrroot /nfs/research2/goldman/gregs/slr_pipeline/data/ens/78/slr --outfile /nfs/research2/goldman/gregs/slr_pipeline/data/pdb_master_table_DSSP.tab --refgenome data/ens/78/pep/Homo_sapiens.GRCh38.pep.all.fa
