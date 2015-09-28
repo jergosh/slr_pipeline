@@ -19,7 +19,7 @@ argparser.add_argument('--dataset_map', metavar="file", type=str, required=True)
 argparser.add_argument('--cath_map', metavar="file", type=str, required=True)
 argparser.add_argument('--outdir', metavar="output_file", type=str, required=True)
 
-raxml_cmd = "raxmlHPC -T 2 -t {} -s {} -n {} -f e -p 1 -m PROTEINGAMMA" # tree, aln, name of the run
+raxml_cmd = "raxmlHPC -T 2 -t {} -s {} -n {} -f e -p 1 -m PROTGAMMALGX" # tree, aln, name of the run
 
 # The trees are in seqsets
 # We might need to prune to the sequences present in the alignment
