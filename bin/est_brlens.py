@@ -54,7 +54,7 @@ def main():
         intree.prune(aln.keys())
         intree.write(outfile=outtree_fn, format=9)
 
-        logfile = path.join(args.outdir, prefix, dataset+'.log')
+        logfile = path.abspath(path.join(args.outdir, prefix, dataset+'.log'))
 
         raxml = raxml_cmd.format(outtree_fn, aln_fn, dataset)
         p = Popen(['bsub', '-o'+logfile, '-n 2', # '-g', '/slr',
