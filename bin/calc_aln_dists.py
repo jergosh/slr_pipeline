@@ -2,23 +2,24 @@ import glob
 import argparse
 from os import path
 
+from Bio import SeqIO
 from Bio import AlignIO
+import dendropy 
 import pandas
 
 import numpy as np
 np.set_printoptions(threshold=np.nan)
 import bpp
+from phylo_utils import likelihood
+from phylo_utils import models
+from phylo_utils import markov
+from phylo_utils.seq_to_partials import seq_to_partials
 
 from Bio.SeqUtils.ProtParam import ProteinAnalysis
 from Bio.SubsMat.MatrixInfo import pam250
 
 # import pairdist
 import bpp
-
-ed = pairdist.EigenDecomp(pairdist.get_q_matrix(pairdist.lg, pairdist.lg_freqs), pairdist.lg_freqs)
-tm = pairdist.TransitionMatrix(ed)
-lk = pairdist.PairLikelihood(tm, 0)
-
 
 
 AAs = [ 'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'W', 'V', 'Y' ]
@@ -45,60 +46,75 @@ def site_freqs(aln):
         
     return np.array(site_freqs)
 
-def process_family_bpp(df, domaindir, dataset_map):
+def process_family_bpp(df, domaindir, treedir, dataset_map):
+    # TODO New, tree-like calculation
+    # - calculate the partials at the root of each family,
+    # using branch lengths from the 
+    # - estimate the branch length using pairs of partials
+    
     res_cath_id, res_id1, res_id2, res_dist = [], [], [], []
     cath_id = df.cath_id.iloc[0]
-    profile_dict = {}
+    all_ids = []
+    seqs = []
     print cath_id
 
     for i, l in df.iterrows():
         if l.stable_id not in dataset_map:
             continue
         dataset = dataset_map[l.stable_id]
+        prefix = dataset.partition('_')[0][:2]
 
         aln_file = path.join(domaindir,
-                             dataset.partition('_')[0][:2],
+                             prefix,
                              l.stable_id+'_'+dataset+'.fa')
-        aln = SeqIO.parse(aln_file, 'fasta')
-        profile_dict[l.stable_id] = str(SeqIO.to_dict(aln)[l.stable_id].seq)
-        # profile_dict[l.stable_id] = site_freqs(aln)
-        
-    all_ids = profile_dict.keys()
+        aln = SeqIO.to_dict(SeqIO.parse(aln_file, 'fasta'))
+        tree_file = path.join(treedir,
+                              prefix,
+                              dataset+'.nh')
+        tree = dendropy.Tree.get_from_path(tree_file, schema='newick')
+        tree.retain_taxa_with_labels(aln.keys())
 
-    if len(all_ids) < 2:
+        for e in tree.postorder_edge_iter():
+            if e.length is None:
+                e.length = 1.0
+
+        partials_dict = {}
+
+        for seqr in aln.values():
+            partials_dict[seqr.id] = seq_to_partials(str(seqr.seq), 'protein')
+            
+
+        TreeLn = likelihood.RunOnTree(markov.TransitionMatrix(models.LG()), partials_dict)
+        TreeLn.set_tree(tree)
+        print i, TreeLn.run()
+        
+    if len(seqs) < 2:
         return
 
-    bpp.Alignment(, 'protein')
+    aln = bpp.Alignment(seqs, 'protein')
+    aln.set_substitution_model("WAG01")
+    aln.set_constant_rate_model()
+    aln.compute_distances()
+    dists = aln.get_distances()
 
-    for id_1, id_2 in zip(*[ list(i) for i in np.triu_indices(len(all_ids), 1) ]):
-        aln_1 = profile_dict[ all_ids[id_1] ]
-        aln_2 = profile_dict[ all_ids[id_2] ]
-
-        if len(aln_1.shape) == 1 or len(aln_2.shape) == 1:
-            continue
-
-        # for l in np.arange(0.0, 100.0, 1.0):
-        #     lk.update_transmat(l)
-        #     lk_res = lk.calculate(aln_1, aln_2, pairdist.lg_freqs)
-        #     print '\t'.join([ str(i) for i in [l] + list(lk_res) ])
-        try:
-            dist, r, var = pairdist.optimise(lk, aln_1, aln_2, pairdist.lg_freqs, max_brlen=100, verbose=False)
-            if not r.converged:
-                print "Distance estimation not converged!" 
-        except ValueError, e:
-            print e
-            dist = 100
-
+    for i_1, i_2 in zip(*[ list(i) for i in np.triu_indices(len(all_ids), 1) ]):
+        id_1 = seqs[i_1][0]
+        id_2 = seqs[i_2][0]
         res_cath_id.append(cath_id)
-        res_id1.append(all_ids[id_1])
-        res_id2.append(all_ids[id_2])
-        res_dist.append(dist)
-        
+        res_id1.append(id_1)
+        res_id2.append(id_2)
+        res_dist.append(dists[i_1, i_2])
+
+    return pandas.DataFrame(data={ "id_1": res_id1,
+                                   "id_2": res_id2,
+                                   "dist": res_dist,
+                                   "cath_id": res_cath_id })
 
 
 def process_family(df, domaindir, dataset_map):
     # FIXME How to make sure we don't have to reorder the pairs to identify them
     # perhaps reorder post-hoc in R
+    
     res_cath_id, res_id1, res_id2, res_dist = [], [], [], []
     cath_id = df.cath_id.iloc[0]
     profile_dict = {}
@@ -145,6 +161,7 @@ def process_family(df, domaindir, dataset_map):
 argparser = argparse.ArgumentParser()
 
 argparser.add_argument('--domaindir', metavar="dir", type=str, required=True)
+argparser.add_argument('--treedir', metavar="dir", type=str, required=True)
 argparser.add_argument('--dataset_map', metavar="file", type=str, required=True)
 argparser.add_argument('--cath_map', metavar="file", type=str, required=True)
 argparser.add_argument('--outfile', metavar="output_file", type=str, required=True)
@@ -161,7 +178,9 @@ def main():
     cath_map = pandas.read_table(args.cath_map, sep='\t',
                                  names=["stable_id", "coords", "cath_id", "pdb_id"])
     # For each protein family, iterate over all pairs
-    all_dists = cath_map.groupby('cath_id').apply(process_family_bpp, args.domaindir, dataset_map)
+    all_dists = cath_map.groupby('cath_id').apply(process_family_bpp,
+                                                  args.domaindir, args.treedir,
+                                                  dataset_map)
     all_dists.to_csv(args.outfile, sep='\t', quoting=False, index=False)
 
 
