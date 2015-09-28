@@ -40,9 +40,10 @@ def main():
         if dataset is None:
             print >>sys.stderr, "Skipping", stable_id
             continue
+
         prefix = dataset.partition('_')[0][:2]
         intree = ete2.Tree(path.join(args.treedir, prefix, dataset+'.nh'))
-        aln_fn = path.absolute(path.join(args.domaindir, prefix,
+        aln_fn = path.abspath(path.join(args.domaindir, prefix,
                                          stable_id+'_'+dataset+'.fa'))
         aln = SeqIO.to_dict(SeqIO.parse(aln_fn, 'fasta'))
         outtree_fn = path.join(args.outdir, prefix, dataset+'.nh')
