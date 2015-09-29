@@ -72,21 +72,16 @@ def process_family_bpp(df, domaindir, treedir, dataset_map):
                               prefix,
                               dataset+'.nh')
         tree = dendropy.Tree.get_from_path(tree_file, schema='newick')
-        tree.retain_taxa_with_labels(aln.keys())
-
-        for e in tree.postorder_edge_iter():
-            if e.length is None:
-                e.length = 1.0
 
         partials_dict = {}
 
         for seqr in aln.values():
             partials_dict[seqr.id] = seq_to_partials(str(seqr.seq), 'protein')
             
-
         TreeLn = likelihood.RunOnTree(markov.TransitionMatrix(models.LG()), partials_dict)
         TreeLn.set_tree(tree)
         print i, TreeLn.run()
+        print TreeLn.model
         
     if len(seqs) < 2:
         return
