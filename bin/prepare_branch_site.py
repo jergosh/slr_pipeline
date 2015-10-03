@@ -40,11 +40,12 @@ def main():
             else:
                 node.name += ' #1'
 
-            workingdir = path.join(outdir, '_'+str(i))
+            workingdir = path.join(outdir, dataset+'_'+str(i))
+            utils.check_dir(workingdir)
             tree.write(outfile=path.join(workingdir, basename))
             node.name = old_name
             print node.name
-
+        
 
 if __name__ == "__main__":
     main()
