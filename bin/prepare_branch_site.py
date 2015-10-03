@@ -27,7 +27,7 @@ def main():
 
     for tree_fn in glob.glob(path.join(args.treeroot, '*', '*.nh')):
         basename = path.basename(tree_fn)
-        dataset = basename.partition('_')[0]
+        dataset = basename.partition('.')[0]
         prefix = dataset.partition('_')[0][:2]
 
         tree = ete2.Tree(tree_fn)
