@@ -32,7 +32,9 @@ def main():
 
         tree = ete2.Tree(tree_fn)
         outdir = path.join(args.outroot, prefix)
+        dataset_dir = path.join(outdir, dataset)
         utils.check_dir(outdir)
+        utils.check_dir(dataset_dir)
         for i, node in enumerate(tree.traverse("postorder")):
             old_name = node.name
             if node.name == 'NoName':
@@ -40,7 +42,7 @@ def main():
             else:
                 node.name += ' #1'
 
-            workingdir = path.join(outdir, dataset+'_'+str(i))
+            workingdir = path.join(dataset_dir, dataset+'_'+str(i))
             utils.check_dir(workingdir)
             tree.write(outfile=path.join(workingdir, basename))
             node.name = old_name
