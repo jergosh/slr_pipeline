@@ -11,7 +11,7 @@ import ete2
 argparser = argparse.ArgumentParser()
 
 # Use an ID list + dataset map as a way of limiting the number of files?
-argparser.add_argument('--treedir', metavar="dir", type=str, required=True)
+argparser.add_argument('--treeroot', metavar="dir", type=str, required=True)
 
 # Alignment stays the same but maybe needs to be copied to a subdir
 # Dir structure:
@@ -20,7 +20,7 @@ argparser.add_argument('--treedir', metavar="dir", type=str, required=True)
 def main():
     args = argparser.parse_args()
 
-    for tree_fn in glob.glob(path.join()):
+    for tree_fn in glob.glob(path.join(args.treeroot, '*', '*.nh')):
         basename = path.basename(tree_fn)
         dataset = basename.partition('_')[0]
         prefix = dataset.partition('_')[0][:2]
