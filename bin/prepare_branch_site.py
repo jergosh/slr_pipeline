@@ -44,7 +44,7 @@ def main():
             utils.check_dir(workingdir)
             tree.write(outfile=path.join(workingdir, basename))
             node.name = old_name
-            print node.name
+            print workingdir, node.name
         
 
 if __name__ == "__main__":
