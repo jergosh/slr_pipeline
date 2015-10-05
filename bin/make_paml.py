@@ -4,10 +4,7 @@ from Bio import AlignIO
 from Bio.Align import MultipleSeqAlignment
 from argparse import ArgumentParser
 
-def write_paml(aln, fh):
-    print >>fh, len(aln), aln.get_alignment_length()
-    for seqr in aln:
-        print >>fh, seqr.id + "  " + seqr.seq
+from utils import write_paml
 
 def write_slr(slr_fh, nt_aln_fh, tree_file, gene_name):
     slr_template = """seqfile: %s

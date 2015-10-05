@@ -38,6 +38,9 @@ argparser = argparse.ArgumentParser()
 argparser.add_argument('--clade', metavar='clade', type=str, required=True)
 argparser.add_argument('--treeroot', metavar='tree_root', type=str, required=True)
 argparser.add_argument('--alnroot', metavar='aln_root', type=str, required=True)
+argparser.add_argument('--aln_format', metavar='aln_format', type=str, default="*_prank.best.fas")
+argparser.add_argument('--tree_format', metavar='tree_format', type=str, default=".nh")
+argparser.add_argument('--basename_sep', metavar='char', type=str, default="_")
 argparser.add_argument('--outroot', metavar='out_root', type=str, required=True)
 
 args = argparser.parse_args()
@@ -49,14 +52,14 @@ slrdir = args.outroot
 utils.check_dir(slrdir)
 utils.check_dir(path.join(slrdir, args.clade))
 
-for infile in glob(path.join(alndir, args.clade, "*", "*_prank.best.fas")):
+for infile in glob(path.join(alndir, args.clade, "*", args.aln_format)):
     print infile
-    basename = path.basename(infile).rpartition('_')[0]
+    basename = path.basename(infile).rpartition(args.basename_sep)[0]
     prefix = basename.partition('_')[0][:2]
 
     # treedir = path.join(treeroot, args.clade, prefix)
     treedir = path.join(treeroot, args.clade, prefix)
-    treefile = path.join(treedir, basename + '.nh')
+    treefile = path.join(treedir, basename + args.tree_format)
     # FIXME This is presumably for yeast
     # treefile = path.join(treedir, 'RAxML_result.' + basename)
 
