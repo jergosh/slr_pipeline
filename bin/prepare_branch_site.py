@@ -31,6 +31,7 @@ def main():
         basename = path.basename(tree_fn)
         dataset = basename.partition('.')[0]
         prefix = dataset.partition('_')[0][:2]
+        print "Processing", dataset
 
         tree = ete2.Tree(tree_fn)
         aln = AlignIO.read(path.join(args.alnroot, prefix, dataset+"_prank.best.fas"))
@@ -42,7 +43,7 @@ def main():
         utils.check_dir(dataset_dir)
 
         tree.prune(seqnames)
-        utils.write_paml(open(path.join(outdir, dataset+'.paml', 'w'), aln)
+        utils.write_paml(open(path.join(outdir, dataset+'.paml', 'w'), aln))
 
         for i, node in enumerate(tree.traverse("postorder")):
             old_name = node.name
