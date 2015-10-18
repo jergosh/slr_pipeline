@@ -59,9 +59,9 @@ def main():
         utils.check_dir(outdir)
         utils.check_dir(dataset_dir)
 
-        utils.write_paml(aln, open(path.join(dataset_dir, dataset+'.paml'), 'w'), slr=False)
-
         tree.prune(seqnames)
+        utils.write_paml(open(path.join(outdir, dataset+'.paml'), 'w'), aln)
+
         for i, node in enumerate(tree.traverse("postorder")):
             old_name = node.name
             if node.name == 'NoName':
