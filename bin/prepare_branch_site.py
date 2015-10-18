@@ -7,6 +7,7 @@ import glob
 # Model A1 (null): model = 2, NSsites = 2,  fix_omega = 1, omega = 1 
 from Bio import AlignIO
 from Bio import SeqIO
+# from Bio.PAML import codeml
 import ete2
 
 import utils
@@ -14,6 +15,8 @@ import utils
 argparser = argparse.ArgumentParser()
 
 # Use an ID list + dataset map as a way of limiting the number of files?
+argparser.add_argument('--infile', metavar="dir", type=str, required=True)
+argparser.add_argument('--dataset_map', metavar="dir", type=str, required=True)
 argparser.add_argument('--treeroot', metavar="dir", type=str, required=True)
 argparser.add_argument('--alnroot', metavar="dir", type=str, required=True)
 argparser.add_argument('--outroot', metavar="dir", type=str, required=True)
@@ -25,15 +28,31 @@ argparser.add_argument('--outroot', metavar="dir", type=str, required=True)
 def main():
     args = argparser.parse_args()
 
+    dataset_map = {}
+    for l in open(args.dataset_map):
+        f = l.rstrip().split('\t')
+        dataset_map[f[0]] = f[1]
+
     utils.check_dir(args.outroot)
 
-    for tree_fn in glob.glob(path.join(args.treeroot, '*', '*.nh')):
-        basename = path.basename(tree_fn)
-        dataset = basename.partition('.')[0]
+    processed = set()
+    for l in open(args.infile):
+        f = l.rstrip().split('\t')
+        stable_id = f[0]
+        if stable_id in processed:
+            continue
+        else:
+            processed.add(stable_id)
+
+        dataset = dataset_map[stable_id]
+        basename = dataset+'.nh'
         prefix = dataset.partition('_')[0][:2]
+        tree_fn = path.join(args.treeroot, prefix, basename)
+        print "Processing", dataset
 
         tree = ete2.Tree(tree_fn)
-        aln = AlignIO.read(path.join(args.alnroot, prefix, dataset+"_prank.best.fas"))
+        tree.unroot()
+        aln = AlignIO.read(path.join(args.alnroot, prefix, dataset+"_prank.best.fas"), 'fasta')
         seqnames = SeqIO.to_dict(aln).keys()
 
         outdir = path.join(args.outroot, prefix)
@@ -51,9 +70,14 @@ def main():
             else:
                 node.name += ' #1'
 
-            workingdir = path.join(dataset_dir, dataset+'_'+str(i))
-            utils.check_dir(workingdir)
-            tree.write(outfile=path.join(workingdir, basename))
+            subset_dir = path.join(dataset_dir, dataset+'_'+str(i))
+            utils.check_dir(subset_dir)
+            tree.write(outfile=path.join(subset_dir, basename), format=5)
+
+            for run_id in [ "1", "2" ]:
+                workingdir = path.join(subset_dir, run_id)
+                utils.check_dir(workingdir)
+                # Probably the null can be run just once for all the branches
             node.name = old_name
         
 
