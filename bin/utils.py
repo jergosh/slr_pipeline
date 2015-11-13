@@ -81,15 +81,23 @@ def parse_chain(pdb_chain, pdb_begin_id, pdb_begin_ins, pdb_end_id, pdb_end_ins)
     return found_begin_id, found_begin_i, found_begin_id, found_end_i
 
 ens_re = re.compile("^([A-Z]+)")
-species_file = open("species_codes.txt")
-species_map = {}
+species_fn = "species_codes.txt"
+species_map = None
 
-for l in species_file:
-    f = l.rstrip().split('\t')
-    species_map[f[0]] = f
+def init_species_map():
+    species_file = open(species_fn)
+    global species_map
+    species_map = {}
+
+    for l in species_file:
+        f = l.rstrip().split('\t')
+        species_map[f[0]] = f
 
 # pprint.pprint(species_map)
 def ens2species(ens_id, long_name=False):
+    if species_map is None:
+        init_species_map()
+
     prefix = ens_re.match(ens_id)
     if prefix == None:
         return None
