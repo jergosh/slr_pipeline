@@ -30,7 +30,7 @@ for infile in glob(path.join(inroot, args.clade, "*", "*.ctl")):
 
     utils.check_dir(logdir)
 
-    logfile = path.join(logdir, basename.rpartition('.')[0] + '.log')
+    logfile = path.abspath(path.join(logdir, basename.rpartition('.')[0] + '.log'))
     # errfile = path.join(logdir, args.clade, basename + '.err')
 
     slr = slr_cmd.format(basename)
