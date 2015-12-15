@@ -14,11 +14,15 @@ def check_dir(dirname):
     if not path.exists(dirname):
         os.mkdir(dirname)
 
-def write_paml(aln, fh):
+def write_paml(aln, fh, slr=True):
     print >>fh, len(aln), aln.get_alignment_length()
-    for seqr in aln:
-        print >>fh, seqr.id
-        print >>fh, seqr.seq
+    if slr:
+        for seqr in aln:
+            print >>fh, seqr.id
+            print >>fh, seqr.seq
+    else:
+        for seqr in aln:
+            print >>fh, seqr.id + "  " + seqr.seq
 
 # Ensembl REST API stuff
 http = httplib2.Http(".cache")
