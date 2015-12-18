@@ -14,7 +14,6 @@ import utils
 
 argparser = argparse.ArgumentParser()
 
-# Use an ID list + dataset map as a way of limiting the number of files?
 argparser.add_argument('--infile', metavar="dir", type=str, required=True)
 argparser.add_argument('--dataset_map', metavar="dir", type=str, required=True)
 argparser.add_argument('--treeroot', metavar="dir", type=str, required=True)
@@ -72,7 +71,7 @@ def main():
 
             subset_dir = path.join(dataset_dir, dataset+'_'+str(i))
             utils.check_dir(subset_dir)
-            tree.write(outfile=path.join(subset_dir, basename), format=5)
+            tree.write(outfile=path.join(subset_dir, basename), format=3)
 
             for run_id in [ "1", "2" ]:
                 workingdir = path.join(subset_dir, run_id)

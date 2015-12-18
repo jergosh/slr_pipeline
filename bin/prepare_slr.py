@@ -4,6 +4,7 @@ from os import path
 import argparse
 import re
 import utils
+from utils import write_paml
 
 from dendropy import Tree
 from Bio import SeqIO
@@ -16,12 +17,6 @@ def match_ids(tree, fasta):
     matched_ids = tree_ids.intersection(fasta_ids)
 
     return matched_ids
-
-def write_paml(aln, fh):
-    print >>fh, len(aln), aln.get_alignment_length()
-    for seqr in aln:
-        print >>fh, seqr.id
-        print >>fh, seqr.seq
 
 def write_slr(slr_fh, nt_aln_fh, tree_file, gene_name):
     slr_template = """seqfile: %s
