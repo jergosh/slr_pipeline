@@ -1,6 +1,5 @@
 """
-Download PDB files for all alignments. Choose the best structure for each
-aligment and report it in the ensembl_pdb_map.txt.
+Download PDB files for all alignments.
 """
 import os
 import os.path as path
@@ -11,6 +10,7 @@ import warnings
 # Suppress warnings from PDBParser
 warnings.simplefilter("ignore")
 
+import pandas as pd
 from Bio import SeqIO
 from Bio import PDB
 
@@ -42,8 +42,11 @@ missing_file = open(args.missing_log, 'w')
 # We use the PDBe for faster transfers
 # pdbl=PDB.PDBList(server="ftp://ftp.ebi.ac.uk/pub/databases/rcsb/")
 pdbl=PDB.PDBList()
-for l in best_pdb_file:
-    ens, pdbname = l.rstrip().split('\t')[:2]
+pdb_master = pd.read_table(open(args.pdbmap), sep="\t",
+                           names=["stable_id", "ens_pos", "uniprot_id", "uniprot_pos", "pdb_id", "pdb_chain", "pdb_pos", "sec_str", "rsa", "omega" ])
+
+pdb_ids = set(pdb_master.pdb_id)
+for pdbname in pdb_ids:
     final_file = None
     if path.exists(path.join(pdb_dir, 'pdb'+pdbname+'.ent')):
         print pdbname, "already downloaded."

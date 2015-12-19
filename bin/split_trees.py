@@ -4,12 +4,16 @@ import sys
 import pickle
 import operator
 import time
+import re
+import copy
 from pprint import pprint
 from argparse import ArgumentParser
 
 import ete2
 import emf
 import utils
+
+ens_RE = re.compile("[A-Z]+")
 
 argparser = ArgumentParser()
 
@@ -60,10 +64,32 @@ def load_clade(fh):
         self.thr = thr
 
 class TCC(object):
-    def __init__(self, clade, condition, thr):
+    def __init__(self, clade, thr):
         self.clade = clade
-        self.condition = condition
+        # self.condition = condition
         self.thr = thr
+
+    def calc(self, node):
+        desc_species = set([ n.species for n in node.get_leaves() ])
+        clade_cov = float(len(desc_species.intersection(self.clade))) / len(self.clade)
+
+        return clade_cov
+
+    def check(self, node):
+        return self.calc(node) > self.thr
+
+class TCC_abs(TCC):
+    def __init__(self, clade, thr):
+        super(TCC_abs, self).__init__(clade, thr)
+
+    def calc(self, node):
+        desc_species = set([ n.species for n in node.get_leaves() ])
+        clade_cov = float(len(desc_species.intersection(self.clade))) / len(self.clade)
+
+        return clade_cov
+
+    def check(self, node):
+        return self.calc(node) > self.thr
 
 class TCCList(object):
     def __init__(self):
@@ -81,62 +107,205 @@ class TCCList(object):
 
         return True
 
-def split_tree(intree, tcclist):
+def split_tree(intree, tcc):
     seqsets, subtrees = [], []
+
+    for node in intree.traverse("postorder"):
+        species_codes = []
+        for n in node.get_leaves():
+            match = ens_RE.match(n.name)
+            species_codes.append(match.group())
+
+        paralog_frac = float(len(species_codes)-len(set(species_codes)))/len(species_codes)
+
+        node.add_features(paralog_frac=paralog_frac)
+        node.add_features(tcc=tcc.calc(node))
+        node.add_features(split=tcc.check(node))
+
+    for node in copy.deepcopy(intree).traverse("postorder"):
+        children = node.get_children()
+
+        if not len(children):
+            if node.name.startswith("ENSP0"):
+                node.add_features(n_human=1)
+            else:
+                node.add_features(n_human=0)
+
+            node.add_features(done=False, split=False)
+            continue
+
+        else:
+            node.add_features(n_human=(children[0].n_human+children[1].n_human))
+
+
+        if any([ n.done for n in children ]):
+            node.add_features(done=True)
+            for child in children:
+                if child.split and not child.done:
+                    seqsets.append([ (n.name, n.species) for n in child.get_leaves() ])
+                    subtrees.append(child)
+
+            continue
+
+        if len(children) != 2:
+            print node
+            print children
+            sys.exit(-1)
+
+        # if any([ child.split for child in children ]):
+        #     node.done = True
+        # else:
+        #     node.done = False
+
+        # if all([ child.split for child in children ]):
+        #     node.done = True
+        # else:
+        #     node.done =False
+                
+        if (children[0].split and children[1].split) or node.is_root():
+            node.add_features(done=True)
+
+        elif children[0].split or children[1].split:
+            if children[0].split:
+                child_split = children[0]
+                child_unsplit = children[1]
+            else:
+                child_split = children[1]
+                child_unsplit = children[0]
+
+            if child_split.n_human and child_unsplit.n_human:
+                if node.paralog_frac <= child_split.paralog_frac:
+                    node.add_features(done=False)
+                else:
+                    node.add_features(done=True)
+            elif child_split.n_human and not child_unsplit.n_human:
+                if node.paralog_frac <= child_split.paralog_frac:
+                    node.add_features(done=False)
+                else:
+                    node.add_features(done=True)
+            elif not child_split.n_human and child_unsplit.n_human:
+                # Continuing up the tree is the only chance for this human ID
+                # to be included
+                node.add_features(done=False)
+            # Neither subtree contains a human sequence -- we continue up the tree
+            elif not child_split.n_human and not child_unsplit.n_human:
+                node.add_features(done=False)
+                # Is it 'fair' to include 
+                
+        else:
+            node.add_features(done=False)
+
+        if node.done:
+            for child in children:
+                if child.split:
+                    seqsets.append([ (n.name, n.species) for n in child.get_leaves() ])
+                    subtrees.append(child)
+
+    return seqsets, subtrees
+
+def split_tree_gregj(intree, tcc):
+    for node in intree.traverse("postorder"):
+        node.add_features(split=tcc.check(node))
+        node.add_features(tcc=tcc.calc(node))
+
+    next_round = [ copy.deepcopy(intree) ]
+    seqsets, subtrees = [], []
+
+    round = 1
+    while len(next_round):
+        current_round, next_round = next_round, []
+        print "Round", round
+
+        round += 1
+        for tree in current_round:
+            children = tree.get_children()
+            if not len(children) == 2:
+                if len(children) == 0:
+                    print >>sys.stderr, "Leaf node, suspicious!"
+                    continue
+
+                print >>sys.stderr, "Something's up!"
+                sys.exit(-1)
+
+            if children[0].split and children[1].split:
+                next_round.append(children[0].detach())
+                next_round.append(children[1].detach())
+            else:
+                if tree.split:
+                    seqsets.append([ (n.name, n.species) for n in tree.get_leaves() ])
+                    subtrees.append(tree)
+            # elif tree == intree and tree.split:
+            #     subtrees.append(tree)
+            #     seqsets.append((tree.name, tree.species))
+
+    return seqsets, subtrees
+    
+def process_tree(intree, tcc):
+    print "-"*40
 
     trees = []
     to_remove = []
     for node in intree.traverse("postorder"):
         if node.dist > 100:
             node.detach()
-            if len(node.get_descendants()) > 0:
+            # print "Detaching:", str(node), len(node.get_leaves())
+            if len(node.get_leaves()) > 1:
                 trees.append(node)
         # TODO: Does this do anything?
         elif node.is_leaf() and not getattr(node, 'species', None):
-            print "REMOVING b/c of lack of species ann."
+            # print >>sys.stderr, "REMOVING b/c of lack of species ann.", node.name
+            node.detach()
+        elif node.is_leaf() and not node.name.startswith("ENS"):
+            # print >>sys.stderr, "REMOVING apparently non-Ensembl species ID", node.name
             node.detach()
 
     if len(intree.get_children()):
         trees.append(intree)
+
     # if len(to_remove):
     #     print to_remove
     #     for n in to_remove:
     #         n.detach()
 
     # TMP
-    for node in intree.get_leaves():
-        if not getattr(node, 'species', None):
-            print "MISSING SPECIES", node.name
-            print node.get_children()
+    # for node in intree.get_leaves():
+    #     if not getattr(node, 'species', None):
+    #         print "MISSING SPECIES", node.name
+    #         print node.get_children()
 
+    trees_fixed = []
     for tree in trees:
+        root_to_fix = False
         for node in tree.traverse("postorder"):
             children = node.get_children()
-            if any([ n.done for n in children ]):
-                # if not all([ n.done for n in children ]):
-                #     print "Warning!"
-                node.add_features(done=True)
-                continue
+            if len(children) == 1:
+                parent = node.up
+                if parent is None: # Root has one child
+                    # print >>sys.stderr, "Fixing root"
+                    root_to_fix = True
+                    break
 
-            if len(children) and any([ n.split for n in children ]):
-                seqset = []
-                for ch in children:
-                    if ch.split:
-                        seqsets.append([ (n.name, n.species) for n in ch.get_leaves() ])
-                        subtrees.append(ch)
-                node.add_features(done=True)
-            else:
-                if tcclist.check(node):
-                    node.add_features(split=True)
-                else:
-                    node.add_features(split=False)
+                child = node.children[0]
 
-                node.add_features(done=False)
+                # print "Reattaching", child.name
+                brlen = child.dist + node.dist
+                node.detach()
+                parent.add_child(child, dist=brlen)
+                    
+                # print len(parent.get_children())
+                # for child in parent.get_children():
+                #     print "\t"+str(len(child.get_children()))
 
-    return seqsets, subtrees
+        if root_to_fix:
+            assert len(tree.get_children()) == 1
+            trees_fixed.append(tree.get_children()[0])
+        else:
+            trees_fixed.append(tree)
 
-colours = { -1: "black", 0: "red", 1: "green", 2: "blue", 3: "purple", 4: "orange", 5: "yellow", 6: "grey", 7: "#009999",
-            8: "#FF7400"}
+    return trees_fixed
+
+
+colours = { -1: "black", 0: "red", 1: "green", 2: "blue", 3: "purple", 4: "orange", 5: "yellow", 6: "grey", 7: "#009999", 8: "#FF7400", 9: "Wheat", 10: "MistyRose", 11: "Goldenrod", 12: "Brown", 13: "DeepPink", 14: "Gold", 15: "Plum", 16: "Magenta", 17: "DarkSlateBlue", 18: "Olive", 19: "LightCoral", 20: "SteelBlue" }
 def make_layout(nodesets):
     nodemap = {}
     for i, ns in enumerate(nodesets):
@@ -144,10 +313,12 @@ def make_layout(nodesets):
             nodemap[n[0]] = i
 
     def layout(node):
-        if node.D == "Y":
-            node.img_style["shape"] = "circle"
-            node.img_style["size"] = 12
-            node.img_style["fgcolor"] = "red"
+        node.add_face(ete2.TextFace(node.tcc), column=0, position="branch-right")
+
+        # if node.D == "Y":
+        #     node.img_style["shape"] = "circle"
+        #     node.img_style["size"] = 12
+        #     node.img_style["fgcolor"] = "red"
 
         if node.is_leaf():
             nameFace = ete2.faces.AttrFace("name", fsize=20, 
@@ -167,7 +338,8 @@ def main():
 
     all_species = utils.ens_get("/info/species/")["species"]
     all_species_names = [ it["name"].replace("_", " ") for it in all_species ]
-    all_species_names.remove("Ancestral sequences")
+    # FIXME Temporary
+    # all_species_names.remove("Ancestral sequences")
 
     if path.exists(clades_pickle):
         Clades = pickle.load(open(clades_pickle, 'rb'))
@@ -178,8 +350,9 @@ def main():
 
     pprint(Clades)
 
-    TL = TCCList()
-    TL.add(TCC(Clades[args.clade], operator.ge, args.thr))
+    # TL = TCCList()
+    # TL.add(TCC(Clades[args.clade], operator.ge, args.thr))
+    tcc = TCC(Clades[args.clade], args.thr)
 
     utils.check_dir(path.join(out_root, args.clade))
 
@@ -191,12 +364,25 @@ def main():
 
         tree.write(outfile=path.join(treedir, "{}.nh".format(tree_id)))
 
-        seqsets, subtrees = split_tree(tree, TL)
+        trees_fixed = process_tree(tree, tcc)
+        seqsets, subtrees = [], []
+        for tree_fixed in trees_fixed:
+            t_seqsets, t_subtrees = split_tree_gregj(tree_fixed, tcc)
+            pprint(t_seqsets)
+            print len(t_seqsets)
+            ts = ete2.TreeStyle()
+            ts.show_leaf_name = False
+            layout = make_layout(t_seqsets)
+            tree_fixed.show(layout=layout, tree_style=ts)
+
+            seqsets.extend(t_seqsets)
+            subtrees.extend(t_subtrees)
+
+
         outdir = path.join(out_root, args.clade, str(tree_id)[:2])
         utils.check_dir(outdir)
 
         # Treevis
-        # layout = make_layout(seqsets)
         # imgdir = path.join(img_root, args.clade)
         # utils.check_dir(imgdir)
         # imgfile = path.join(imgdir, "{}.pdf".format(tree_id))
