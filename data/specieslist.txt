@@ -1,35 +1,39 @@
-Cow	Bos taurus		ENSBTA
-Dog	Canis familiaris	ENSCAF
-Guinea Pig	Cavia porcellus		ENSCPO
-Sloth	Choloepus hoffmanni	ENSCHO
-Armadillo	Dasypus novemcinctus	ENSDNO
-Kangaroo Rat	Dipodomys ordii		ENSDOR
-Tenrec	Echinops telfairi	ENSETE
-Horse	Equus caballus		ENSECA
-Hedgehog	Erinaceus europaeus	ENSEEU
-Cat	Felis catus		ENSFCA
-Human	Homo sapiens		ENS
-Squirrel	Ictidomys tridecemlineatus	ENSSTO
-Elephant	Loxodonta africana	ENSLAF
-Macaque	Macaca mulatta		ENSMMU
-Mouse Lemur	Microcebus murinus	ENSMIC
-Mouse	Mus musculus		ENSMUS
-Microbat	Myotis lucifugus	ENSMLU
-Pika	Ochotona princeps	ENSOPR
-Rabbit	Oryctolagus cuniculus	ENSOCU
-Chimp	Pan troglodytes		ENSPTR
-Hyrax	Procavia capensis	ENSPCA
-Megabat	Pteropus vampyrus	ENSPVA
-Rat	Rattus norvegicus	ENSRNO
-Shrew	Sorex araneus		ENSSAR
-Pig	Sus scrofa		ENSSSC
-Tarsier	Tarsius syrichta	ENSTSY
-Tree Shrew	Tupaia belangeri	ENSTBE
-Bottlenose dolphin	Tursiops truncatus	ENSTTR
 Alpaca	Vicugna pacos	ENSVPA
+Armadillo	Dasypus novemcinctus	ENSDNO
+Bottlenose Dolphin	Tursiops truncatus	ENSTTR
+Bushbaby	Otolemur garnettii	ENSOGA
+Cat	Felis catus	ENSFCA
+Chimp	Pan troglodytes	ENSPTR
+Cow	Bos taurus	ENSBTA
+Dog	Canis familiaris	ENSCAF
+Elephant	Loxodonta africana	ENSLAF
+Ferret	Mustela putorius furo	ENSMPU
+Gibbon	Nomascus leucogenys	ENSNLE
 Gorilla	Gorilla gorilla	ENSGGO
+Green Monkey	Chlorocebus sabaeus	ENSCSA
+Guinea Pig	Cavia porcellus	ENSCPO
+Hedgehog	Erinaceus europaeus	ENSEEU
+Horse	Equus caballus	ENSECA
+Human	Homo sapiens	ENS
+Hyrax	Procavia capensis	ENSPCA
+Kangaroo Rat	Dipodomys ordii	ENSDOR
+Macaque	Macaca mulatta	ENSMMU
+Marmoset	Callithrix jacchus	ENSCJA
+Megabat	Pteropus vampyrus	ENSPVA
+Microbat	Myotis lucifugus	ENSMLU
+Mouse	Mus musculus	ENSMUS
+Mouse Lemur	Microcebus murinus	ENSMIC
+Olive Baboon	Papio anubis	ENSPAN
 Orangutan	Pongo abelii	ENSPPY
 Panda	Ailuropoda melanoleuca	ENSAME
-Marmoset	Callithrix jacchus	ENSCJA
-Gibbon	Nomascus leucogenys	ENSNLE
-Ferret	Mustela putorius furo	ENSMPU
+Pig	Sus scrofa	ENSSSC
+Pika	Ochotona princeps	ENSOPR
+Rabbit	Oryctolagus cuniculus	ENSOCU
+Rat	Rattus norvegicus	ENSRNO
+Sheep	Ovis aries	ENSOAR
+Shrew	Sorex araneus	ENSSAR
+Sloth	Choloepus hoffmanni	ENSCHO
+Squirrel	Ictidomys tridecemlineatus	ENSSTO
+Tarsier	Tarsius syrichta	ENSTSY
+Tenrec	Echinops telfairi	ENSETE
+Tree Shrew	Tupaia belangeri	ENSTBE
