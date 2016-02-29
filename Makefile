@@ -1,7 +1,7 @@
 CLADE=Eutheria
 # CLADE=Primates
 # CLADE=yeast
-# SPECIES_LIST=data/specieslist.txt
+SPECIES_LIST=data/specieslist.txt
 
 # General setup and files to be donwloaded from Ensembl
 ENS_VERSION=78
@@ -9,11 +9,12 @@ EMF_URL=ftp://ftp.ensembl.org/pub/release-$(ENS_VERSION)/emf/ensembl-compara/hom
 PR_ROOT=$(shell pwd)
 ENS_ROOT=$(PR_ROOT)/data/ens/$(ENS_VERSION)
 EMF_GZIP=$(ENS_ROOT)/Compara.$(ENS_VERSION).protein.nhx.gz
-EMF_FILE=$(ENS_ROOT)/Compara.$(ENS_VERSION).protein.nhx
+# EMF_FILE=$(ENS_ROOT)/Compara.$(ENS_VERSION).protein.nhx
+EMF_FILE=$(ENS_ROOT)/Compara.78.protein.nhx
 SPECIES_CACHE=$(ENS_ROOT)/clades.pk
-TREE_ROOT=$(ENS_ROOT)/trees
+TREE_ROOT=$(ENS_ROOT)/trees_greg_63
 IMG_ROOT=$(ENS_ROOT)/img
-SEQSETS_ROOT=$(ENS_ROOT)/seqsets
+SEQSETS_ROOT=$(ENS_ROOT)/seqsets_fixed
 SEQSETS_CDS_ROOT=$(ENS_ROOT)/seqsets_cds
 SEQSETS_PEP_ROOT=$(ENS_ROOT)/seqsets_pep
 DIVERGE_ROOT=$(ENS_ROOT)/diverge
@@ -84,11 +85,21 @@ cds_files: # TODO depend on a wildcarded genome files
 	--species_cache $(SPECIES_CACHE) --cds
 	gunzip $(CDS_DIR)/*.gz
 
-split_trees: $(EMF_FILE)
+split_trees: # $(EMF_FILE)
 	mkdir -p $(SEQSETS_ROOT)
 	mkdir -p $(IMG_ROOT)
 	mkdir -p $(TREE_ROOT)
-	$(BSUB) python bin/split_trees.py --emf $(EMF_FILE) --clade $(CLADE) --treeroot $(TREE_ROOT) \
+	# $(BSUB) 
+	python bin/split_trees.py --emf $(EMF_FILE) --clade $(CLADE) --treeroot $(TREE_ROOT) \
+	--imgroot $(IMG_ROOT) --outroot $(SEQSETS_ROOT) --species_cache $(SPECIES_CACHE) \
+	--species_list $(SPECIES_LIST)
+
+split_trees_old: # $(EMF_FILE)
+	mkdir -p $(SEQSETS_ROOT)
+	mkdir -p $(IMG_ROOT)
+	mkdir -p $(TREE_ROOT)
+	# $(BSUB) 
+	python bin/split_trees_old.py --emf $(EMF_FILE) --clade $(CLADE) --treeroot $(TREE_ROOT) \
 	--imgroot $(IMG_ROOT) --outroot $(SEQSETS_ROOT) --species_cache $(SPECIES_CACHE)
 
 # NOTE This used to be 'align_all'
