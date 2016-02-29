@@ -207,3 +207,28 @@ pdb_master_table: $(UNIPROT_SEQ_FILE)
 # python bin/parse_sifts.py --clade Eutheria --pdbmap /nfs/research2/goldman/gregs/slr_pipeline/data/ens/78/pdb_map_Eutheria.tab --pdbdir /nfs/research2/goldman/gregs/slr_pipeline/data/pdb --slrroot /nfs/research2/goldman/gregs/slr_pipeline/data/ens/78/slr --outfile /nfs/research2/goldman/gregs/slr_pipeline/data/pdb_master_table_Eutheria.tab --siftsdir data/sifts
 
 # bsub -I -M 20000 -R "rusage[mem=30000]" python bin/run_dssp.py --clade Eutheria --siftsmap /nfs/research2/goldman/gregs/slr_pipeline/data/pdb_master_table_Eutheria.tab --pdbdir /nfs/research2/goldman/gregs/slr_pipeline/data/pdb --slrroot /nfs/research2/goldman/gregs/slr_pipeline/data/ens/78/slr --outfile /nfs/research2/goldman/gregs/slr_pipeline/data/pdb_master_table_DSSP.tab --refgenome data/ens/78/pep/Homo_sapiens.GRCh38.pep.all.fa
+
+# SLR subsamples and replicates
+prepare_slr_sub:
+# $(BSUB)
+	python bin/prepare_slr.py --clade "" --treeroot data/ens/78/aln_sub \
+	--alnroot data/ens/78/aln_sub --outroot data/ens/78/aln_sub_slr  \
+	--aln_format "*.fa" --tree_format ".nwk" --basename_sep "."
+
+prepare_slr_div:
+# $(BSUB)
+	python bin/prepare_slr.py --clade "" --treeroot data/ens/78/aln_div \
+	--alnroot data/ens/78/aln_div --outroot data/ens/78/aln_div_slr  \
+	--aln_format "*.fa" --tree_format ".nwk" --basename_sep "."
+
+slr_sub:
+	python bin/slr_bsub.py --clade "" --slrroot data/ens/78/aln_sub_slr --logdir log/slr_sub
+
+slr_div:
+	python bin/slr_bsub.py --clade "" --slrroot data/ens/78/aln_div_slr --logdir log/slr_div
+
+# Estimating branch lengths with RAxML
+# python bin/est_brlens.py --treedir data/ens/78/seqsets/Eutheria/ --cath_map cath_map_1.20.1070.10.tab --dataset_map data/dataset_map.tab --outroot data/ens/78/brlens --domaindir data/ens/78/domain_alns/Eutheria/
+
+# Calculate pairwise distances between instances of domains
+# python -i bin/calc_aln_dists.py --domaindir data/ens/78/domain_alns/Eutheria --cath_map data/cath/cath_map_1.20.1070.10.tab --outfile data/cath_dists.tab --dataset_map data/dataset_map.tab --treedir data/ens/78/seqsets/Eutheria/
