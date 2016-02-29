@@ -10,7 +10,6 @@ from pprint import pprint
 from argparse import ArgumentParser
 
 import ete3
-print ete3.__file__
 import emf
 import utils
 
@@ -112,7 +111,9 @@ class TCCList(object):
 
         return True
 
+abandoned = 0
 def split_tree(intree, tcc):
+    global abandoned
     seqsets, subtrees = [], []
 
     for node in intree.traverse("postorder"):
@@ -142,7 +143,6 @@ def split_tree(intree, tcc):
         else:
             node.add_features(n_human=(children[0].n_human+children[1].n_human))
 
-
         if any([ n.done for n in children ]):
             node.add_features(done=True)
             for child in children:
@@ -156,17 +156,7 @@ def split_tree(intree, tcc):
             print node
             print children
             sys.exit(-1)
-
-        # if any([ child.split for child in children ]):
-        #     node.done = True
-        # else:
-        #     node.done = False
-
-        # if all([ child.split for child in children ]):
-        #     node.done = True
-        # else:
-        #     node.done =False
-                
+    
         if (children[0].split and children[1].split) or node.is_root():
             node.add_features(done=True)
 
@@ -182,6 +172,8 @@ def split_tree(intree, tcc):
                 if node.paralog_frac <= child_split.paralog_frac:
                     node.add_features(done=False)
                 else:
+                    print "'Abandoning' at TCC", child_unsplit.tcc, "("+str(child_unsplit.n_human)+")"
+                    abandoned += 1
                     node.add_features(done=True)
             elif child_split.n_human and not child_unsplit.n_human:
                 if node.paralog_frac <= child_split.paralog_frac:
@@ -205,6 +197,14 @@ def split_tree(intree, tcc):
                 if child.split:
                     seqsets.append([ (n.name, n.species) for n in child.get_leaves() ])
                     subtrees.append(child)
+
+            if node.is_root():
+                if len(children):
+                    if not any([ child.split for child in children ]):
+                        if node.split:
+                            seqsets.append([ (n.name, n.species) for n in node.get_leaves() ])
+                            subtrees.append(node)
+
 
     return seqsets, subtrees
 
@@ -238,12 +238,40 @@ def split_tree_gregj(intree, tcc):
             subtrees.append(children[1].detach())
             node.done = True
         else:
-            if node.split and node == tree:
+            if node.split and node.is_root():
                 seqsets.append([ (n.name, n.species) for n in node.get_leaves() ])
                 subtrees.append(tree)
             # elif tree == intree and tree.split:
             #     subtrees.append(tree)
             #     seqsets.append((tree.name, tree.species))
+
+    return seqsets, subtrees
+
+def split_tree_old(intree, tcc):
+    seqsets, subtrees = [], []
+
+    for node in intree.traverse("postorder"):
+        children = node.get_children()
+        if any([ n.done for n in children ]):
+            # if not all([ n.done for n in children ]):
+            #     print "Warning!"
+            node.add_features(done=True)
+            continue
+
+        if len(children) and any([ n.split for n in children ]):
+            seqset = []
+            for ch in children:
+                if ch.split:
+                    seqsets.append([ (n.name, n.species) for n in ch.get_leaves() ])
+                    subtrees.append(ch)
+            node.add_features(done=True)
+        else:
+            if tcc.check(node):
+                node.add_features(split=True)
+            else:
+                node.add_features(split=False)
+
+            node.add_features(done=False)
 
     return seqsets, subtrees
     
@@ -388,10 +416,13 @@ def main():
         seqsets, subtrees = [], []
         for tree_fixed in trees_fixed:
             # taxa = [ n.name for n in tree_fixed.get_leaves() if (ens_RE.match(n.name).group()[:-1] in species) ]
-
+            # all_human = set([ n.name for n in tree_fixed if n.name.startswith("ENSP0") ])
             # tree_fixed.prune(taxa, preserve_branch_length=True)
 
             t_seqsets, t_subtrees = split_tree(tree_fixed, tcc)
+            # all_human_split = set()
+            # [ [ all_human_split.add(n[0]) for n in seqset ] for seqset in t_seqsets ]
+            # print all_human.difference(all_human_split)
             # ts = ete3.TreeStyle()
             # ts.show_leaf_name = False
             # layout = make_layout(t_seqsets)
@@ -431,6 +462,9 @@ def main():
             set_id += 1
 
         tree_id += 1
+
+    global abandoned
+    print abandoned
 
 if __name__ == "__main__":
     main()
