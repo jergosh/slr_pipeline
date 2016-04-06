@@ -34,7 +34,7 @@ all_ids = []
 all_data = [] # pandas.DataFrame(columns=colnames)
 
 for aln_fn in glob(path.join(alndir, clade, "*", "*_prank.best.fas")):
-    dataset = path.basename(result_fn).partition('.')[0]
+    dataset = path.basename(aln_fn).rpartition('_')[0]
     prefix = basename.partition('_')[0][:2]
 
     result_fn = path.join(memeroot, clade, basename+'.txt')
