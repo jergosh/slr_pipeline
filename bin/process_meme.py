@@ -34,7 +34,7 @@ all_ids = []
 all_data = [] # pandas.DataFrame(columns=colnames)
 
 for aln_fn in glob(path.join(alndir, clade, "*", "*_prank.best.fas")):
-    dataset = path.basename(aln_fn).rpartition('_')[0]
+    basename = path.basename(aln_fn).rpartition('_')[0]
     prefix = basename.partition('_')[0][:2]
 
     result_fn = path.join(memeroot, clade, basename+'.txt')
@@ -60,7 +60,7 @@ for aln_fn in glob(path.join(alndir, clade, "*", "*_prank.best.fas")):
         meme_out = file(path.join(memeroot, clade, prefix, seqr.id + '_' + basename + '_meme.txt'), 'w')
         result_subset.to_csv(meme_out, quoting=False, index=False, sep='\t')
 
-        result_subset['dataset'] = pandas.Series([dataset]*result_subset.shape[0], index=result_subset.index)
+        result_subset['dataset'] = pandas.Series([basename]*result_subset.shape[0], index=result_subset.index)
         result_subset['stable_id'] = pandas.Series([seqr.id]*result_subset.shape[0], index=result_subset.index)
         result_subset['human_idx'] = pandas.Series(range(1, result_subset.shape[0]+1), index=result_subset.index)
 
