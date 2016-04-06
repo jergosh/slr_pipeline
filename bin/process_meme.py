@@ -25,7 +25,14 @@ argparser.add_argument('--outfile', metavar='out_file', type=str, required=True)
 
 args = argparser.parse_args()
 
+clade = args.clade
+alndir = args.alnroot
+slrroot = args.slrroot
+slr_all = args.outfile
+
+all_ids = []
 all_data = [] # pandas.DataFrame(columns=colnames)
+
 for aln_fn in glob(path.join(alndir, clade, "*", "*_prank.best.fas")):
     dataset = path.basename(result_fn).partition('.')[0]
     prefix = basename.partition('_')[0][:2]
