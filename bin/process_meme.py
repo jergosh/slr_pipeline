@@ -27,7 +27,7 @@ args = argparser.parse_args()
 
 clade = args.clade
 alndir = args.alnroot
-slrroot = args.slrroot
+memeroot = args.memeroot
 slr_all = args.outfile
 
 all_ids = []
