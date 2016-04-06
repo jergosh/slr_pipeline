@@ -38,6 +38,7 @@ for aln_fn in glob(path.join(alndir, clade, "*", "*_prank.best.fas")):
     prefix = basename.partition('_')[0][:2]
 
     result_fn = path.join(memeroot, clade, prefix, basename+'.txt')
+    print result_fn
 
     if not path.exists(result_fn):
         print result_fn, "doesn't exist!"
