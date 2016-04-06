@@ -44,7 +44,11 @@ for aln_fn in glob(path.join(alndir, clade, "*", "*_prank.best.fas")):
         print result_fn, "doesn't exist!"
         continue
 
-    result = pandas.read_table(open(result_fn))
+    try:
+        result = pandas.read_table(open(result_fn))
+    except ValueError:
+        print "Empty file"
+        continue
 
     aln = AlignIO.read(aln_fn, 'fasta')
     for seqr in aln:
