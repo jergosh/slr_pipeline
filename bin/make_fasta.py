@@ -54,6 +54,7 @@ tree = ete3.Tree(args.infile)
 
 seqs = []
 for l in tree.iter_leaves():
+    seqid = l.name
     seq = ens_map.get(seqid)
     if seq is None:
         print >>sys.stderr, seqid, "missing!"
