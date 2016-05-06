@@ -27,8 +27,28 @@ argparser.add_argument('--species_list', metavar='species_file', type=str, requi
 argparser.add_argument('--thr', metavar='value', type=float, default=0.6)
 
 def load_species(fh):
-    return [ l.rstrip().split('\t')[2] for l in fh ]
+    species_names, species = zip(*[ l.rstrip().split('\t')[1:] for l in fh ])
+    return [ s.lower() for s in species_names ], species
 
+def remove_node(node):
+    parent = node.up
+    if parent is None:
+        return node 
+
+    grandparent = parent.up 
+
+    node.detach()
+    assert len(parent.children) == 1
+    sibling = parent.children[0].detach()
+    dist = parent.dist
+    parent.detach()
+
+    if grandparent is not None:
+        grandparent.add_child(sibling)
+        assert sibling.up == grandparent
+        sibling.dist += dist
+
+    return node
 
 def filter_clades(species, clade_names):
     clade_names = set(clade_names)
@@ -74,13 +94,16 @@ class TCC(object):
         self.thr = thr
 
     def calc(self, node):
+        if len(node.children) == 0:
+            return 0.0
+
         desc_species = set([ n.species for n in node.get_leaves() ])
-        clade_cov = float(len(desc_species.intersection(self.clade))) / len(self.clade)
+        clade_cov = float(len(desc_species)) / len(self.clade)
 
         return clade_cov
 
     def check(self, node):
-        return self.calc(node) > self.thr
+        return self.calc(node) >= self.thr
 
 class TCC_abs(TCC):
     def __init__(self, clade, thr):
@@ -93,7 +116,7 @@ class TCC_abs(TCC):
         return clade_cov
 
     def check(self, node):
-        return self.calc(node) > self.thr
+        return self.calc(node) >= self.thr
 
 class TCCList(object):
     def __init__(self):
@@ -208,42 +231,93 @@ def split_tree(intree, tcc):
 
     return seqsets, subtrees
 
-def split_tree_gregj(intree, tcc):
+## What I've learned here is that setting node as done can fail if both children have been detached
+def baseline_tcc(intree, tcc):
+    seqsets, subtrees = [], []
     for node in intree.traverse("postorder"):
+        children = node.get_children()
         node.add_features(split=tcc.check(node))
         node.add_features(tcc=tcc.calc(node))
         node.add_features(done=False)
 
+        if not len(children):
+            if node.name.startswith("ENSP0"):
+                node.add_features(n_human=1)
+            else:
+                node.add_features(n_human=0)
+        else:
+            node.add_features(n_human=(children[0].n_human+children[1].n_human))
+
+    for node in copy.deepcopy(intree).traverse("postorder"):
+        if node.up is None and node.done == False:
+            seqsets.append([ (n.name, n.species) for n in node.get_leaves() if getattr(n, 'species', None) ])
+            subtrees.append(node.detach())
+
+        elif node.n_human == 1 and node.up.n_human > 1:
+            node.up.done = True
+
+            seqsets.append([ (n.name, n.species) for n in node.get_leaves() ])
+            subtrees.append(node.detach())
+
+
+    return seqsets, subtrees
+
+def split_tree_gregj(intree, tcc):
+    # for node in intree.traverse("postorder"):
+    #     node.add_features(split=tcc.check(node))
+    #     node.add_features(tcc=tcc.calc(node))
+    #     node.add_features(done=False)
+
     seqsets, subtrees = [], []
 
-    tree = copy.deepcopy(intree)
+    tree = intree # copy.deepcopy(intree)
     for node in tree.traverse("postorder"):
         children = node.get_children()
         if not len(children) == 2:
             if len(children) == 0:
                 continue
             else:
-                print children
+                print "Children", children
                 print >>sys.stderr, "Something's up!"
                 sys.exit(-1)
 
-        if any([ ch.done for ch in children ]):
-            node.done = True
-            continue
-
-        if children[0].split and children[1].split:
-            seqsets.append([ (n.name, n.species) for n in children[0].get_leaves() ])
+        # if any([ ch.done for ch in children ]):
+        #     print "Already done"
+        #     node.done = True
+        #     continue
+        
+        # if children[0].split and children[1].split:
+        if tcc.check(children[0]) and tcc.check(children[1]):
+            seqset = [ (n.name, n.species) for n in children[0].get_leaves() ]
+            if len(seqset) < 21:
+                print seqset
+                sys.exit(-1)
+            seqsets.append(seqset)
             subtrees.append(children[0].detach())
-            seqsets.append([ (n.name, n.species) for n in children[1].get_leaves() ])
+            seqset = [ (n.name, n.species) for n in children[1].get_leaves() ]
+            if len(seqset) < 21:
+                print seqset
+                sys.exit(-1)
+            seqsets.append(seqset)
             subtrees.append(children[1].detach())
-            node.done = True
+
+            parent = node.up
+            remove_node(node)
+            # node.done = True
         else:
-            if node.split and node.is_root():
-                seqsets.append([ (n.name, n.species) for n in node.get_leaves() ])
-                subtrees.append(tree)
-            # elif tree == intree and tree.split:
-            #     subtrees.append(tree)
-            #     seqsets.append((tree.name, tree.species))
+            if node.is_root():
+                print "At root"
+                # if node.split:
+                if tcc.check(node):
+                    print node
+                    seqset = [ (n.name, n.species) for n in node.get_leaves() ]
+                    print len(seqset)
+                    if len(seqset) < 21:
+                        sys.exit(-1)
+                    seqsets.append(seqset)
+                    
+                    subtrees.append(node)
+                    
 
     return seqsets, subtrees
 
@@ -275,38 +349,35 @@ def split_tree_old(intree, tcc):
 
     return seqsets, subtrees
     
-def process_tree(intree, tcc):
-    print "-"*40
-
+def process_tree(intree, fix=True):
     trees = []
-    to_remove = []
+    to_keep = []
+    for l in intree.iter_leaves():
+        if getattr(l, 'species', None):
+            to_keep.append(l)
+
+    try:
+        intree.prune(to_keep)
+    except ete3.coretype.tree.TreeError:
+        return []
+
     for node in intree.traverse("postorder"):
-        if node.dist > 100:
+        if fix and node.dist > 100:
+            print "Fixing..."
             node.detach()
             # print "Detaching:", str(node), len(node.get_leaves())
             if len(node.get_leaves()) > 1:
                 trees.append(node)
         # TODO: Does this do anything?
         elif node.is_leaf() and not getattr(node, 'species', None):
-            # print >>sys.stderr, "REMOVING b/c of lack of species ann.", node.name
+            print >>sys.stderr, "REMOVING b/c of lack of species ann.", node.name
             node.detach()
         elif node.is_leaf() and not node.name.startswith("ENS"):
-            # print >>sys.stderr, "REMOVING apparently non-Ensembl species ID", node.name
-            node.detach()
+            print >>sys.stderr, "REMOVING apparently non-Ensembl species ID", node.name
+            # node.detach()
 
     if len(intree.get_children()):
         trees.append(intree)
-
-    # if len(to_remove):
-    #     print to_remove
-    #     for n in to_remove:
-    #         n.detach()
-
-    # TMP
-    # for node in intree.get_leaves():
-    #     if not getattr(node, 'species', None):
-    #         print "MISSING SPECIES", node.name
-    #         print node.get_children()
 
     trees_fixed = []
     for tree in trees:
@@ -333,7 +404,15 @@ def process_tree(intree, tcc):
 
         if root_to_fix:
             assert len(tree.get_children()) == 1
-            trees_fixed.append(tree.get_children()[0])
+
+            while len(tree.get_children()) == 1:
+                tree = tree.get_children()[0]
+
+            if len(tree.get_children()) == 0:
+                continue
+
+            assert len(tree.get_children()) == 2
+            trees_fixed.append(tree)
         else:
             trees_fixed.append(tree)
 
@@ -367,8 +446,10 @@ def main():
 
     emf_file = args.emf
     out_root = args.outroot
+    out_root_ann = args.outroot+'_ann'
     img_root = args.imgroot
     tree_root = args.treeroot
+    ann_root = tree_root+'_ann'
     clades_pickle = args.species_cache
 
     all_species = utils.ens_get("/info/species/")["species"]
@@ -376,64 +457,78 @@ def main():
     # FIXME Temporary
     # all_species_names.remove("Ancestral sequences")
 
-    species = load_species(open(args.species_list))
+    species_names, species = load_species(open(args.species_list))
 
-    if path.exists(clades_pickle):
-        Clades = pickle.load(open(clades_pickle, 'rb'))
-    else:
-        Clades = filter_clades(all_species_names,
-                               [ "Eutheria", "Glires", "Laurasiatheria", "Sauria", "Mammalia", "Primates" ])
-        pickle.dump(Clades, open(clades_pickle, 'wb'))
+    # if path.exists(clades_pickle):
+    #     Clades = pickle.load(open(clades_pickle, 'rb'))
+    # else:
+    #     Clades = filter_clades(all_species_names,
+    #                            [ "Eutheria", "Glires", "Laurasiatheria", "Sauria", "Mammalia", "Primates" ])
+    #     pickle.dump(Clades, open(clades_pickle, 'wb'))
 
-    pprint(Clades)
+    # pprint(Clades)
 
+    # clade = set(Clades[args.clade]).intersection(species_names)
+    clade = species_names
+    print len(clade), clade
     # TL = TCCList()
     # TL.add(TCC(Clades[args.clade], operator.ge, args.thr))
-    tcc = TCC(Clades[args.clade], args.thr)
+    tcc = TCC(clade, args.thr)
 
+    utils.check_dir(path.join(tree_root))
+    utils.check_dir(path.join(out_root))
     utils.check_dir(path.join(out_root, args.clade))
+
+    utils.check_dir(path.join(ann_root))
+    utils.check_dir(path.join(out_root_ann))
+    utils.check_dir(path.join(out_root_ann, args.clade))
 
     tree_id = 1
     for tree in emf.EMF(emf_file):
-        # if tree_id < 472:
-        #     tree_id += 1
-        #     continue
-        print tree_id
+        print tree_id, len(tree.get_leaves()),
+        anndir = path.join(ann_root, str(tree_id)[:2])
+        utils.check_dir(anndir)
         treedir = path.join(tree_root, str(tree_id)[:2])
         utils.check_dir(treedir)
 
+        to_keep = []
         for n in tree.get_leaves():
             match = ens_RE.match(n.name)
-            if match is None or match.group()[:-1] not in species:
-                n.delete(prevent_nondicotomic=True, preserve_branch_length=True)
+            if match is not None and match.group()[:-1] in species:
+                to_keep.append(n.name)
 
-        if not len(tree.get_leaves()):
+        if not len(to_keep):
             continue
 
-        tree.write(outfile=path.join(treedir, "{}.nh".format(tree_id)))
+        tree.prune(to_keep)
 
-        trees_fixed = process_tree(tree, tcc)
+        tree.write(outfile=path.join(treedir, "{}.nh".format(tree_id)), format=5)
+        tree.write(outfile=path.join(anndir, "{}.nh".format(tree_id)), features=["D", "species"], format=1)
+        print "-"*40
+        trees_fixed = process_tree(tree, fix=True)
+        # print tree.get_ascii(show_internal=True)
         seqsets, subtrees = [], []
         for tree_fixed in trees_fixed:
-            # taxa = [ n.name for n in tree_fixed.get_leaves() if (ens_RE.match(n.name).group()[:-1] in species) ]
-            # all_human = set([ n.name for n in tree_fixed if n.name.startswith("ENSP0") ])
-            # tree_fixed.prune(taxa, preserve_branch_length=True)
-
+            # t_seqsets, t_subtrees = split_tree_gregj(tree_fixed, tcc)
             t_seqsets, t_subtrees = split_tree(tree_fixed, tcc)
-            # all_human_split = set()
-            # [ [ all_human_split.add(n[0]) for n in seqset ] for seqset in t_seqsets ]
-            # print all_human.difference(all_human_split)
+            # t_seqsets, t_subtrees = baseline_tcc(tree_fixed, tcc)
+            ## Tree formatting stu
             # ts = ete3.TreeStyle()
             # ts.show_leaf_name = False
             # layout = make_layout(t_seqsets)
             # tree_fixed.show(layout=layout, tree_style=ts)
-
+            
+            for seqset in t_seqsets:
+                if len(seqset) < 21:
+                    sys.exit(-1)
             seqsets.extend(t_seqsets)
             subtrees.extend(t_subtrees)
 
-
+        print subtrees
         outdir = path.join(out_root, args.clade, str(tree_id)[:2])
+        outdir_ann = path.join(out_root_ann, args.clade, str(tree_id)[:2])
         utils.check_dir(outdir)
+        utils.check_dir(outdir_ann)
 
         # Treevis
         # imgdir = path.join(img_root, args.clade)
@@ -455,7 +550,9 @@ def main():
 
             # try:
             subtree.write(outfile=path.join(outdir, "{}_{}.nh".format(tree_id, set_id)), 
-                          format=6)
+                          format=5)
+            subtree.write(outfile=path.join(outdir_ann, "{}_{}.nh".format(tree_id, set_id)), 
+                          format=1, features=["D", "species"])
             #except AttributeError, e:
             #    print >>sys.stderr, e
 
