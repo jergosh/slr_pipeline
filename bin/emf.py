@@ -1,4 +1,4 @@
-import ete2
+import ete3
 # EMF just for iterating over the file
 # Push annotations to each node
 __all__ = [ "EMF" ]
@@ -45,7 +45,7 @@ class EMF:
 
             treedata.append(l)
 
-        tree = ete2.Tree(''.join(treedata), format=1)
+        tree = ete3.Tree(''.join(treedata), format=1)
         
         for l in tree.get_leaves():
             f = seqs[str(l.name)]
