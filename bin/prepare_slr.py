@@ -48,7 +48,7 @@ utils.check_dir(slrdir)
 utils.check_dir(path.join(slrdir, args.clade))
 
 for infile in glob(path.join(alndir, args.clade, "*", args.aln_format)):
-    print infile
+    # print infile
     basename = path.basename(infile).rpartition(args.basename_sep)[0]
     prefix = basename.partition('_')[0][:2]
 
@@ -65,6 +65,9 @@ for infile in glob(path.join(alndir, args.clade, "*", args.aln_format)):
     tree = Tree.get_from_path(treefile, 'newick', preserve_underscores=True)
 
     matched_ids = match_ids(tree, fasta)
+    if not len(matched_ids):
+        print "Skipping", infile
+        continue
     tree.retain_taxa_with_labels(matched_ids)
     tree.deroot()
 
@@ -88,7 +91,7 @@ for infile in glob(path.join(alndir, args.clade, "*", args.aln_format)):
     print >>outtree, len(fasta), "1"
     print >>outtree, tree.as_string('newick', suppress_rooting=True, 
                                     suppress_internal_taxon_labels=True,
-                                    suppres_internal_node_labels=True)
+                                    suppress_internal_node_labels=True)
 
     write_paml(MultipleSeqAlignment(fasta), pamlfile)
 
