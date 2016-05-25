@@ -83,6 +83,11 @@ for seqset in glob(path.join(inroot, args.clade, "*", "*.tab")):
             print seqid, "missing!"
             # break
         else:
+            # Trim the trailing N's 
+            if seq[3:] == "NNN":
+                print seq
+                seq = seq[:-3]
+                print seq
             seqs.append(SeqRecord(seq, id=seqid, description=""))
     else:
         outdir =  path.join(outroot, args.clade, setid.partition('_')[0][:2])
