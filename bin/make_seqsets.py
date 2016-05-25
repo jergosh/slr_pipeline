@@ -81,14 +81,18 @@ for seqset in glob(path.join(inroot, args.clade, "*", "*.tab")):
         seq = ens_map.get(seqid)
         if seq is None:
             print seqid, "missing!"
-            # break
-        else:
+            continue
+
+        if len(seq)%3 != 0:
+            print seqid, "length is not a multiple of 3!"
+            continue
+
             # Trim the trailing N's 
-            if seq[3:] == "NNN":
-                print seq
-                seq = seq[:-3]
-                print seq
-            seqs.append(SeqRecord(seq, id=seqid, description=""))
+        if seq[-3:] == "NNN":
+            print "Removing trailing 'NNN' from", seq
+            seq = seq[:-3]
+
+        seqs.append(SeqRecord(seq, id=seqid, description=""))
     else:
         outdir =  path.join(outroot, args.clade, setid.partition('_')[0][:2])
         utils.check_dir(outdir)
