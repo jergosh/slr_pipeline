@@ -40,17 +40,19 @@ for aln_fn in glob(path.join(alndir, clade, "*", "*_prank.best.fas")):
     prefix = basename.partition('_')[0][:2]
 
     slr_fn = path.join(slrroot, clade, prefix, basename+'_matched.res')
-
     if not path.exists(slr_fn):
         print slr_fn, "doesn't exist!"
         continue
 
+    print  >>sys.stderr, basename
     # TODO Make sure colspecs work in all cases
-    slr = pandas.read_fwf(open(slr_fn), colspecs=colspecs, header=False, comment="\n", )
+    slr = pandas.read_fwf(open(slr_fn), colspecs=colspecs, comment="\n")
 
     # What if there are multiple human IDs in a single (split) tree? 
     # Are we allowed to potentially double count things like that?
     aln = AlignIO.read(aln_fn, 'fasta')
+    # TODO refactor this into a function
+    # One way to get around this would be to decide separately which sequences are 'of interest'
     for seqr in aln:
         if args.clade == "yeast":
             if yeast_RE.match(seqr.id) is None:
