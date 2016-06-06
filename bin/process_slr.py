@@ -77,6 +77,9 @@ for aln_fn in glob(path.join(alndir, clade, "*", "*_prank.best.fas")):
         slr_subset['stable_id'] = pandas.Series([seqr.id]*slr_subset.shape[0], index=slr_subset.index)
         slr_subset['human_idx'] = pandas.Series(range(1, slr_subset.shape[0]+1), index=slr_subset.index)
 
+        if max(slr_subset['Pval']) > 1:
+            print max(slr_subset['Pval'])
+
         all_data.append(slr_subset)
 
 all_data = pandas.concat(all_data)
