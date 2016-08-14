@@ -9,7 +9,7 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio import SeqIO
 
-import ete2
+import ete3
 
 def match_ids(tree, aln):
     tree_ids = set()
