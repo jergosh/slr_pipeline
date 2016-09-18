@@ -128,6 +128,9 @@ if __name__ == "__main__":
             except PDBException, e:
                 dssp_result = None
                 continue
+            except Exception, e:
+                dssp_result = None
+                continue
         
         uniprot_coord = int(uniprot_coord)-1
         if alignment is None:
