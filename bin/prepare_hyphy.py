@@ -9,7 +9,7 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio import SeqIO
 
-import ete2
+import ete3
 
 def match_ids(tree, aln):
     tree_ids = set()
@@ -66,7 +66,7 @@ for input_file in glob.glob(path.join(args.alndir, args.clade, "*", args.filter)
     tree_file = path.join(args.treedir, args.clade, prefix, input_name+'.nh')
 
     aln = list(SeqIO.parse(open(input_file), 'fasta'))
-    tree = ete2.Tree(tree_file)
+    tree = ete3.Tree(tree_file)
     matched_ids = match_ids(tree, aln)
     tree.prune(matched_ids)
     filtered_aln = [ SeqRecord(sr.seq, id=sr.id, description="")

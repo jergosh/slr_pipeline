@@ -179,8 +179,9 @@ if __name__ == "__main__":
     print >>sys.stderr, "done."
 
     outfile = open(args.outfile, 'w')
+
     sifts_map = pandas.read_csv(open(args.siftsmap), header=None, comment="\n", sep="\t")
     sifts_map.columns = [ "stable_id", "uniprot_id", "uniprot_coord", "pdb_id", "pdb_chain", "res_id" ]
     sifts_map.groupby([ "stable_id", "pdb_id", "pdb_chain" ]).apply(process_slr, args.slrroot, args.clade, args.pdbdir)
-            
+
     # print >>sys.stderr, "Missing from DSSP", dssp_missing
