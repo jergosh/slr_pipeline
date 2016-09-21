@@ -146,7 +146,7 @@ def process_slr(df, slrroot, clade, pdbdir):
                                          uniprot,
                                          str(uniprot_coord),
                                          pdb_id, pdb_chain, row['res_id'],
-                                         str(dssp_info[1]),
+                                         str(dssp_info[2]),
                                          str(dssp_info[3]),
                                          str(omega) ])
         except KeyError, e:
