@@ -99,9 +99,9 @@ def process_slr(df, slrroot, clade, pdbdir):
         return
 
     # TODO Once again, not entirely clear what to do about NMR structures
-    # if len(pdb) > 1:
-    #     print >>sys.stderr, "Multiple models", len(pdb)
-    #     return
+    if len(pdb) > 1:
+        print >>sys.stderr, "Multiple models", len(pdb)
+        return
 
     if not seqs.get(uniprot):
         print >>sys.stderr, "Uniprot sequence missing"
