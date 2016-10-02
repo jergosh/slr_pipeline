@@ -9,8 +9,10 @@ import utils
 argparser = ArgumentParser()
 
 argparser.add_argument('--infile', metavar='data_table', type=str, required=True)
+argparser.add_argument('--pdbdir', metavar='pdb_root', type=str, required=True)
 argparser.add_argument('--outdir', metavar='out_root', type=str, required=True)
 argparser.add_argument('--logdir', metavar='log_file', type=str, required=True)
+argparser.add_argument('--depth_cmd', metavar='depth_cmd', type=str, default="bin/run_depth.py")
 
 
 if __name__ == "__main__":
@@ -20,4 +22,12 @@ if __name__ == "__main__":
     infile.drop_duplicates(subset=["pdb_id", "pdb_chain"], inplace=True)
 
     for i, r in infile.iterrows():
-        print r['stable_id']
+        p = subprocess.Popen("python",
+                             args.depth_cmd,
+                             "--infile "+path.join(args.pdbdir, "pdb"+r['pdb_id']+".ent"),
+                             "--stable_id "+r['stable_id'],
+                             "--pdb_id "+r['pdb_id'],
+                             "--pdb_chain "+r['pdb_chain'],
+                             "--outdir "+args.outdir,
+                             "--logdir "+args.logdir)
+        p.wait()
