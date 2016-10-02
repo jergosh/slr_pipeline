@@ -17,5 +17,5 @@ if __name__ == "__main__":
     args = argparser.parse_args()
 
     infile = pandas.read_csv(open(args.infile), comment="\n", sep="\t")
-    infile.drop_duplicates(cols=["pdb_id", "pdb_chain"], inplace=True)
+    infile.drop_duplicates(subset=["pdb_id", "pdb_chain"], inplace=True)
     print infile
