@@ -26,7 +26,7 @@ if __name__ == "__main__":
     p.wait()
 
     outfile = open(path.join(args.outroot,
-                             "_".join(args.stable_id, args.pdb_id, args.pdb_chain)+'.tab'), 'w')
+                             "_".join([args.stable_id, args.pdb_id, args.pdb_chain])+'.tab'), 'w')
     print >>outfile, "\t".join("stable_id", "pdb_id", "pdb_chain", "pdb_pos", "depth")
 
     infile = open(args.outroot + "-residue.depth")
