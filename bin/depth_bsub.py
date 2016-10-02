@@ -19,11 +19,11 @@ if __name__ == "__main__":
     args = argparser.parse_args()
 
     infile = pandas.read_csv(open(args.infile), comment="\n", sep="\t")
-    infile.drop_duplicates(subset=["pdb_id", "pdb_chain"], inplace=True)
+    infile.drop_duplicates(subset=["stable_id", "pdb_id", "pdb_chain"], inplace=True)
 
     for i, r in infile.iterrows():
         p = subprocess.Popen(["bsub",
-                              "-o"+path(args.logdir, outroot+'.log'),
+                              "-o"+path(args.logdir, "_".join([ r['stable_id'], r['pdb_id'], r['pdb_chain'] ])+'.log'),
                               "python " +
                               args.depth_cmd +
                               " --infile " + path.join(args.pdbdir, "pdb"+r['pdb_id']+".ent") +
