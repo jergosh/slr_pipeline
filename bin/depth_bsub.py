@@ -18,4 +18,6 @@ if __name__ == "__main__":
 
     infile = pandas.read_csv(open(args.infile), comment="\n", sep="\t")
     infile.drop_duplicates(subset=["pdb_id", "pdb_chain"], inplace=True)
-    print infile
+
+    for i, r in infile.iterrows():
+        print r['stable_id']
