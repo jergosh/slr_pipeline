@@ -30,6 +30,5 @@ if __name__ == "__main__":
                               " --stable_id " + r['stable_id'] +
                               " --pdb_id " + r['pdb_id'] +
                               " --pdb_chain " + r['pdb_chain'] +
-                              " --outdir " + args.outdir +
-                              " --logdir " + args.logdir])
+                              " --outdir " + args.outdir])
         p.wait()
