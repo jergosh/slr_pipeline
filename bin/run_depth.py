@@ -20,7 +20,7 @@ if __name__ == "__main__":
     args = argparser.parse_args()
     outroot = "_".join([args.stable_id, args.pdb_id, args.pdb_chain])
 
-    p = subprocess.Popen([ args.depth_exec, "-i"+args.infile, "-o"+path.join(args.outdir, outroot) ])
+    p = subprocess.Popen([ args.depth_exec, "-i "+args.infile, "-o "+path.join(args.outdir, outroot) ])
     p.wait()
 
     outfile = open(path.join(args.outdir,
