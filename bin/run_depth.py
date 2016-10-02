@@ -8,6 +8,9 @@ import utils
 argparser = ArgumentParser()
 
 argparser.add_argument('--infile', metavar='pdb_file', type=str, required=True)
+argparser.add_argument('--stable_id', metavar='stable_id', type=str, required=True)
+argparser.add_argument('--pdb_id', metavar='pdb_id', type=str, required=True)
+argparser.add_argument('--pdb_chain', metavar='pdb_chain', type=str, required=True)
 argparser.add_argument('--outroot', metavar='out_root', type=str, required=True)
 argparser.add_argument('--logfile', metavar='log_file', type=str, required=True)
 argparser.add_argument('--depth_exec', metavar='bin', type=str,
@@ -22,5 +25,15 @@ if __name__ == "__main__":
     p = subprocess.Popen[ "bsub", "-o"+args.logfile, depth_cmd ]
     p.wait()
 
-    for l in open(args.outroot + "-residue.depth"):
-        
+    outfile = open(path.join(args.outroot,
+                             "_".join(args.stable_id, args.pdb_id, args.pdb_chain)+'.tab'), 'w')
+    print >>outfile, "\t".join("stable_id", "pdb_id", "pdb_chain", "pdb_pos", "depth")
+
+    infile = open(args.outroot + "-residue.depth")
+    infile.readline()
+    for l in infile:
+        f = l.rstrip().split('\t')
+        pdb_chain, pdb_pos = f[0].split(':')
+
+        if pdb_chain == args.pdb_chain:
+            print >>outfile, "\t".join(args.stable_id, args.pdb_id, pdb_chain, pdb_pos, f[2])
