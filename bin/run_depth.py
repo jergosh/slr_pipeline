@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     depth_cmd = "{} -i {} -o {}".format(args.depth_exec, args.infile, args.outroot)
     
-    p = subprocess.Popen[ "bsub", "-o"+args.logfile, depth_cmd ]
+    p = subprocess.Popen([ "bsub", "-o"+args.logfile, depth_cmd ])
     p.wait()
 
     outfile = open(path.join(args.outroot,
