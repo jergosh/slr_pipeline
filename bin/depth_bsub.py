@@ -22,12 +22,14 @@ if __name__ == "__main__":
     infile.drop_duplicates(subset=["pdb_id", "pdb_chain"], inplace=True)
 
     for i, r in infile.iterrows():
-        p = subprocess.Popen(["python",
-                              args.depth_cmd,
-                              "--infile", path.join(args.pdbdir, "pdb"+r['pdb_id']+".ent"),
-                              "--stable_id", r['stable_id'],
-                              "--pdb_id", r['pdb_id'],
-                              "--pdb_chain", r['pdb_chain'],
-                              "--outdir", args.outdir,
-                              "--logdir", args.logdir])
+        p = subprocess.Popen(["bsub",
+                              "-o"+path(args.logdir, outroot+'.log'),
+                              "python " +
+                              args.depth_cmd +
+                              " --infile " + path.join(args.pdbdir, "pdb"+r['pdb_id']+".ent") +
+                              " --stable_id " + r['stable_id'] +
+                              " --pdb_id " + r['pdb_id'] +
+                              " --pdb_chain " + r['pdb_chain'] +
+                              " --outdir " + args.outdir +
+                              " --logdir " + args.logdir])
         p.wait()

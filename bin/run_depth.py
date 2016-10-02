@@ -12,7 +12,6 @@ argparser.add_argument('--stable_id', metavar='stable_id', type=str, required=Tr
 argparser.add_argument('--pdb_id', metavar='pdb_id', type=str, required=True)
 argparser.add_argument('--pdb_chain', metavar='pdb_chain', type=str, required=True)
 argparser.add_argument('--outdir', metavar='out_dir', type=str, required=True)
-argparser.add_argument('--logdir', metavar='log_dir', type=str, required=True)
 argparser.add_argument('--depth_exec', metavar='bin', type=str,
                        default="/hps/nobackup/goldman/gregs/depth-2.0/bin/DEPTH")
 
@@ -21,10 +20,7 @@ if __name__ == "__main__":
     args = argparser.parse_args()
     outroot = "_".join([args.stable_id, args.pdb_id, args.pdb_chain])
 
-    depth_cmd = "{} -i {} -o {}".format(args.depth_exec, args.infile,
-                                        path.join(args.outdir, args.outroot))
-    
-    p = subprocess.Popen([ "bsub", "-o"+path(args.logdir, outroot+'.log'), depth_cmd ])
+    p = subprocess.Popen([ depth_exec, "-i"+args.infile, "-o"+path.join(args.outdir, outroot) ])
     p.wait()
 
     outfile = open(path.join(args.outdir,
