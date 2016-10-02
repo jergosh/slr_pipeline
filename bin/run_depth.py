@@ -14,7 +14,7 @@ argparser.add_argument('--pdb_chain', metavar='pdb_chain', type=str, required=Tr
 argparser.add_argument('--outroot', metavar='out_root', type=str, required=True)
 argparser.add_argument('--logfile', metavar='log_file', type=str, required=True)
 argparser.add_argument('--depth_exec', metavar='bin', type=str,
-                       default="/hps/nobackup/goldman/gregs/depth-2.0/doc")
+                       default="/hps/nobackup/goldman/gregs/depth-2.0/bin/DEPTH")
 
 
 if __name__ == "__main__":
