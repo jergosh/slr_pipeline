@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     outfile = open(path.join(args.outroot,
                              "_".join([args.stable_id, args.pdb_id, args.pdb_chain])+'.tab'), 'w')
-    print >>outfile, "\t".join("stable_id", "pdb_id", "pdb_chain", "pdb_pos", "depth")
+    print >>outfile, "\t".join(["stable_id", "pdb_id", "pdb_chain", "pdb_pos", "depth"])
 
     infile = open(args.outroot + "-residue.depth")
     infile.readline()
@@ -36,4 +36,4 @@ if __name__ == "__main__":
         pdb_chain, pdb_pos = f[0].split(':')
 
         if pdb_chain == args.pdb_chain:
-            print >>outfile, "\t".join(args.stable_id, args.pdb_id, pdb_chain, pdb_pos, f[2])
+            print >>outfile, "\t".join([args.stable_id, args.pdb_id, pdb_chain, pdb_pos, f[2]])
