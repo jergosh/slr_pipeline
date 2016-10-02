@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     for i, r in infile.iterrows():
         p = subprocess.Popen(["bsub",
-                              "-o"+path(args.logdir, "_".join([ r['stable_id'], r['pdb_id'], r['pdb_chain'] ])+'.log'),
+                              "-o"+path.join(args.logdir, "_".join([ r['stable_id'], r['pdb_id'], r['pdb_chain'] ])+'.log'),
                               "python " +
                               args.depth_cmd +
                               " --infile " + path.join(args.pdbdir, "pdb"+r['pdb_id']+".ent") +
