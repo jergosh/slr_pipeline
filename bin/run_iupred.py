@@ -26,7 +26,8 @@ if __name__ == "__main__":
     for l in infile:
         f = l.rstrip()
         seqr = ref_dict[f]
-
+        seqr.description = ""
+        
         fa_handle = open(path.join(args.outdir, f + '.fa'), 'w')
         SeqIO.write(seqr, fa_handle, 'fasta')
 
