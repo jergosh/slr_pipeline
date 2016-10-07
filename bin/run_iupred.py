@@ -12,7 +12,7 @@ argparser = argparse.ArgumentParser()
 argparser.add_argument('--infile', metavar="file", type=str, required=True)
 argparser.add_argument('--reffile', metavar="file", type=str, required=True)
 argparser.add_argument('--outdir', metavar="dir", type=str, required=True)
-argparser.add_argument('--iupre', metavar="iupred", type=str, default="iupred")
+argparser.add_argument('--iupred', metavar="iupred", type=str, default="iupred")
 
 
 if __name__ == "__main__":
