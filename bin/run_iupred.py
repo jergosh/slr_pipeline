@@ -30,7 +30,8 @@ if __name__ == "__main__":
         
         fa_handle = open(path.join(args.outdir, f + '.fa'), 'w')
         SeqIO.write(seqr, fa_handle, 'fasta')
-
+        fa_handle.close()
+        
         res_name = path.join(args.outdir, f + '.out')
         res_handle = open(res_name, 'w')
 
