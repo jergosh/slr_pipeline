@@ -24,15 +24,15 @@ if __name__ == "__main__":
     infile = open(args.infile)
 
     for l in infile:
-        f = l.rstrip()
+        ens_id = l.rstrip()
         seqr = ref_dict[f]
         seqr.description = ""
         
-        fa_handle = open(path.join(args.outdir, f + '.fa'), 'w')
+        fa_handle = open(path.join(args.outdir, ens_id + '.fa'), 'w')
         SeqIO.write(seqr, fa_handle, 'fasta')
         fa_handle.close()
         
-        res_name = path.join(args.outdir, f + '.out')
+        res_name = path.join(args.outdir, ens_id + '.out')
         res_handle = open(res_name, 'w')
 
         p = subprocess.Popen([ args.iupred, fa_handle.name, "long" ], stdout=res_handle,
@@ -42,7 +42,7 @@ if __name__ == "__main__":
         res_handle.close()
         res_handle = open(res_name)
 
-        out_handle = open(path.join(args.outdir, f + '.tab'), 'w')
+        out_handle = open(path.join(args.outdir, ens_id + '.tab'), 'w')
         for r in res_handle:
             if r.startswith('#'):
                 continue
