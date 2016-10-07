@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
     for l in infile:
         ens_id = l.rstrip()
-        seqr = ref_dict[f]
+        seqr = ref_dict[ens_id]
         seqr.description = ""
         
         fa_handle = open(path.join(args.outdir, ens_id + '.fa'), 'w')
