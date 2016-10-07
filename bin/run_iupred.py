@@ -48,4 +48,4 @@ if __name__ == "__main__":
                 continue
 
             f = r.strip().split(' ')
-            print >>out_handle, '\t'.join([f, f[0], f[6]])
+            print >>out_handle, '\t'.join([ens_id, f[0], f[6]])
