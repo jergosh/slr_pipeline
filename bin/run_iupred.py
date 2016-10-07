@@ -15,23 +15,6 @@ argparser.add_argument('--outdir', metavar="dir", type=str, required=True)
 argparser.add_argument('--iupre', metavar="iupred", type=str, default="iupred")
 
 
-infile.readline()
-for l in infile:
-    f = l.rstrip().split()
-    ens = f[0]
-    seq = f[1]
-    print ens, seq
-    outfile = open(path.join(args.outdir, ens+'.fa'), 'w')
-    resultfile = open(path.join(args.outdir, ens+'.tab'), 'w')
-    
-    SeqIO.write(SeqRecord(Seq(seq), id=ens, description=""),
-                outfile, 'fasta')
-    outfile.close()
-
-    p = subprocess.Popen(['iupred/iupred', outfile.name, 'long'], stdout=resultfile,
-                         env={"IUPred_PATH": "iupred"})
-    p.wait()
-
 if __name__ == "__main__":
     args = argparser.parse_args()
 
