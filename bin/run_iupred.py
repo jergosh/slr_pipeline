@@ -33,7 +33,8 @@ if __name__ == "__main__":
         res_name = path.join(args.outdir, f + '.out')
         res_handle = open(res_name, 'w')
 
-        p = subprocess.Popen([ args.iupred, res_name, "long" ], stdout=res_handle)
+        p = subprocess.Popen([ args.iupred, res_name, "long" ], stdout=res_handle,
+                             env={ "IUPred_PATH": path.dirname(args.iupred) })
         p.wait()
 
         res_handle.close()
