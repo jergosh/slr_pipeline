@@ -41,9 +41,9 @@ if __name__ == "__main__":
         res_handle = open(res_name)
 
         out_handle = open(path.join(args.outdir, f + '.tab'), 'w')
-        for l in res_handle:
-            if l.startswith('#'):
+        for r in res_handle:
+            if r.startswith('#'):
                 continue
 
-            f = l.strip().split(' ')
+            f = r.strip().split(' ')
             print >>out_handle, '\t'.join([f[0], f[6]])
