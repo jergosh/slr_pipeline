@@ -51,6 +51,8 @@ argparser.add_argument('--outfile', metavar='out_file', type=str, required=True)
 
 args = argparser.parse_args()
 
+outfile = open(args.outfile, 'w')
+
 for aln_fn in glob(path.join(args.alnroot, args.clade, "*", "*_prank.best.fas")):
     basename = path.basename(aln_fn).rpartition('_')[0]
     prefix = basename.partition('_')[0][:2]
@@ -62,12 +64,7 @@ for aln_fn in glob(path.join(args.alnroot, args.clade, "*", "*_prank.best.fas"))
     for i in range(aln.get_alignment_length()):
         print aln[:, i]
         counts = counts_from_col(aln[:, i])
-
-        print column_stats(counts), entropy(counts)
-
-    # TODO Add a safety check for alignment lengths being the same
-    slr_fn = path.join(slrroot, clade, prefix, basename+'_matched.res')
-    if not path.exists(slr_fn):
-        print slr_fn, "doesn't exist!"
-        continue
-    
+        col_stats = column_stats(counts)
+        
+        print >>outflie, basename, i+1, col_stats[0], col_stats[1], entropy(counts)
+        
