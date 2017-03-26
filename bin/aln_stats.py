@@ -62,7 +62,6 @@ for aln_fn in glob(path.join(args.alnroot, args.clade, "*", "*_prank.best.fas"))
     aln = AlignIO.read(aln_fn, 'fasta')
 
     for i in range(aln.get_alignment_length()):
-        print aln[:, i]
         counts = counts_from_col(aln[:, i])
         col_stats = column_stats(counts)
         
