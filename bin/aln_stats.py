@@ -66,5 +66,6 @@ for aln_fn in glob(path.join(args.alnroot, args.clade, "*", "*_prank.best.fas"))
         counts = counts_from_col(aln[:, i])
         col_stats = column_stats(counts)
         
-        print >>outflie, basename, i+1, col_stats[0], col_stats[1], entropy(counts)
+        print >>outfile,
+        '\t'.join([ str(it) for it in [basename, i+1, col_stats[0], col_stats[1], entropy(counts)] ])
         
