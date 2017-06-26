@@ -41,10 +41,10 @@ plot.domain.fractions <- function(fractions, main) {
 fractions.domains <- make.fractions(slr_structure_all, c("sec_simple", "is_domain"), thr=0.05)
 plot.domain.fractions(fractions.domains, "Positive selection and domains")
 ggsave(paste(results, "Domains (all).pdf", sep="/"), height=8, width=11)
-fractions.domains.exposed <- make.fractions(subset(slr_structure_all, buried=="exposed"), c("sec_simple", "is_domain"))
+fractions.domains.exposed <- make.fractions(subset(slr_structure_all, buried=="exposed"), c("sec_simple", "is_domain"), thr=0.05)
 plot.domain.fractions(fractions.domains.exposed, "Positive selection and domains (exposed)")
 ggsave(paste(results, "Domains (exposed).pdf", sep="/"), height=8, width=11)
-fractions.domains.buried <- make.fractions(subset(slr_structure_all, buried=="buried"), c("sec_simple", "is_domain"))
+fractions.domains.buried <- make.fractions(subset(slr_structure_all, buried=="buried"), c("sec_simple", "is_domain"), thr=0.05)
 plot.domain.fractions(fractions.domains.buried, "Positive selection and domains (buried)")
 ggsave(paste(results, "Domains (buried).pdf", sep="/"), height=8, width=11)
 

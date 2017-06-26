@@ -1,29 +1,11 @@
 library(GenomicRanges)
 library(rtracklayer)
-library(plyr)
+
 library(adehabitat)
 library(biomaRt)
+library(plyr)
 
 setwd("~/Documents/projects/slr_pipeline")
-
-Fisher.test <- function(p) {
-  Xsq <- -2*sum(log(p))
-  p.val <- 1-pchisq(Xsq, df = 2*length(p))
-  return(c(Xsq = Xsq, p.value = p.val))
-}
-
-Stouffer.test <- function(p, w) { # p is a vector of p-values
-  if (missing(w)) {
-    w <- rep(1, length(p))/length(p)
-  } else {
-    if (length(w) != length(p))
-      stop("Length of p and w must equal!")
-  }
-  Zi <- qnorm(1-p) 
-  Z  <- sum(w*Zi)/sqrt(sum(w^2))
-  p.val <- 1-pnorm(Z)
-  return(c(Z = Z, p.value = p.val))
-}
 
 # slr_all <- read.table("data/slr_all.tab", header=T, sep="\t", comment="", stringsAsFactors=F)
 slr_all <- read.table("data/slr_all_200716.tab", header=T, sep="\t", comment="", stringsAsFactors=F)
@@ -39,26 +21,67 @@ summary(slr_all$Omega)
 plot(density(slr_all$Omega, na.rm=T), xlim=c(0,5))
 hist(slr_all$Omega, breaks=100)
 
-slr_filtered <- subset(slr_all, (Note != "Single char") & (Note != "! Single cha") & (Note != "All gaps") & (Note != "0 Single cha"))
+slr_all <- subset(slr_all, (Note != "Single char") & (Note != "! Single cha") & (Note != "All gaps") & (Note != "0 Single cha"))
+slr_all$ens_pos <- slr_all$human_idx
+
+all_ids <- unique(slr_all$stable_id)
+write.table(all_ids, file="data/all_ids.tab", quote=F, col.names=F, row.names=F)
 
 # Significance threshold
 thr = 0.05
  
 slr_all <- subset(slr_all, is.finite(slr_all$upper))
-slr_all$Pval[slr_all$Omega < 1] <- runif(sum(slr_all$Omega < 1))
+# slr_all$Pval[slr_all$Omega < 1] <- runif(sum(slr_all$Omega < 1))
 # Divide by 2
-slr_all$Pval[slr_all$Omega > 1] <- slr_all$Pval[slr_all$Omega > 1] / 2
+# slr_all$Pval[slr_all$Omega > 1] <- slr_all$Pval[slr_all$Omega > 1] / 2
 
-p_adjusted = p.adjust(slr_all$Pval, "BH")
+# slr_all <- subset(slr_all, Pval <= 1)
+
+p_adjusted <- p.adjust(slr_all$Pval, "BH")
 slr_all$Adj.Pval <- p_adjusted
-sum(slr_all$Adj.Pval < thr)
+sum(slr_all$Adj.Pval < thr & slr_all$Omega > 1)
+
 pos_sel <- subset(slr_all, Omega > 1 & Adj.Pval < thr)
-
-
 sum(as.numeric(as.character(slr_all$lower)) > 1, na.rm=T)
 
-all_ids <- unique(slr_all$stable_id)
-write.table(all_ids, file="data/all_ids.tab", quote=F, col.names=F, row.names=F)
+## Disorder predictions
+disorder_pred <- read.table("data/iupred.tab", sep="\t", header=F, stringsAsFactors=F)
+head(disorder_pred)
+colnames(disorder_pred) <- c("stable_id", "ens_pos", "iupred")
+
+slr_all <- join(slr_all, disorder_pred, match="first")
+sum(is.na(slr_all$iupred))
+slr_all$disorder <- slr_all$iupred > 0.5
+hist(slr_all$iupred, breaks=100)
+table(slr_all$disorder)
+
+sum(is.na(slr_all$disorder))
+
+sum(slr_all$Adj.Pval < 0.05 & slr_all$Omega > 1.0 & slr_all$disorder == TRUE, na.rm=T)/sum(slr_all$disorder == TRUE, na.rm=T)
+sum(slr_all$Adj.Pval < 0.05 & slr_all$Omega > 1.0 & slr_all$disorder == FALSE, na.rm=T)/sum(slr_all$disorder == FALSE, na.rm=T)
+
+mean(subset(slr_all, disorder == TRUE)$Omega)
+mean(subset(slr_all, disorder == FALSE)$Omega)
+
+ggplot(slr_all, aes(y=fr_aligned, x=disorder)) + 
+  theme_minimal(base_size=8, base_family="Helvetica") +
+  theme(axis.line.x = element_line(color = "black"),
+        axis.line.y = element_line(color = "black")) +
+  scale_x_discrete() + 
+  xlab("") +
+  ylab("Fraction aligned") +
+  coord_cartesian(ylim=c(0, 1)) +
+  geom_boxplot()
+
+
+slr_all <- ddply(slr_all, "stable_id", function(df) {
+  df[1:(nrow(df)-1), ]
+})
+
+aln_stats <- read.table("data/aln_stats.tab", header=F, stringsAsFactors=F, sep="\t")
+colnames(aln_stats) <- c("dataset", "Site", "n_aligned", "fr_aligned", "entropy")
+slr_stats <- join(slr_all, aln_stats)
+slr_all <- slr_stats
 
 # Ens annotation
 # ens_annotation <- import.gff("~/Downloads/Homo_sapiens.GRCh37.73.gtf", format="gtf")
@@ -136,39 +159,4 @@ sums <- vapply(thrs, function(thr) sum(slr_nonzero$Adj.Pval < thr & slr_nonzero$
 
 plot(thrs, sums, main="Number of significant sites", xlab="FDR", ylab="Count")
 par(mfrow=c(1, 1))
-dev.off()
-
-## Whole-gene analysis?
-## Is it enough to just multiply p-values under < 0.05 
-slr_nonzero_pos <- subset(slr_nonzero, Omega > 1.0)
-
-fisher.pvals <- ddply(slr_nonzero_pos, "stable_id", function(df) {Fisher.test(df$Pval)})
-stouffer.pvals <- ddply(slr_nonzero_pos, "stable_id", function(df) {Stouffer.test(df$Pval)})
-min.pvals <- ddply(slr_nonzero_pos, "stable_id", function(df) {c(p.value=min(p.adjust(df$Pval, method="BH")))})
-
-N <- length(unique(slr_all$stable_id))
-fisher.sums <- vapply(thrs, function(thr) sum(p.adjust(fisher.pvals$p.value, method="BH", n=N) < thr),
-               FUN.VALUE=0.0)
-
-stouffer.sums <- vapply(thrs, function(thr) sum(p.adjust(stouffer.pvals$p.value, method="BH", n=N) < thr),
-                      FUN.VALUE=0.0)
-
-min.sums <- vapply(thrs, function(thr) sum(p.adjust(min.pvals$p.value, method="BH", n=N) < thr),
-                      FUN.VALUE=0.0)
-
-##
-## Have the adjusted p-values by threshold as well?
-## Maybe put the distribution + 
-## What about the genes where there are no sites with \omega > 1?
-##
-
-pdf("PSG.pdf", height=11, width=8)
-par(mfrow=c(3,2))
-hist(fisher.pvals$p.value, breaks=100, main="Gene p-values (Fisher's method)", xlab="p-value")
-plot(thrs, fisher.sums)
-hist(stouffer.pvals$p.value, breaks=100, main="Gene p-values (Stouffer's method)", xlab="p-value")
-plot(thrs, stouffer.sums)
-hist(min.pvals$p.value, breaks=100, main="Gene p-values (BH-corrected minimum)", xlab="p-value")
-plot(thrs, min.sums)
-par(mfrow=c(1,1))
 dev.off()

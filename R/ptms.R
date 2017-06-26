@@ -1,12 +1,17 @@
 library(ReactomePA)
 library(Biostrings)
 library(plyr)
+library(biomaRt)
+
+mart <- useMart("ENSEMBL_MART_ENSEMBL", dataset="hsapiens_gene_ensembl",
+                      host="feb2014.archive.ensembl.org")
 
 PTM_table <- read.table("data/PTMfunc/PTM_lists/psites_spectral_counts.tab", header=T, fill=T, stringsAsFactors=F)
 PTM_table$PTMpos = PTM_table$PTMpos + 1 # Coordinate offset
 PTM_human <- subset(PTM_table, Species == "HS")
 nrow(PTM_human)
 
+head(subset(PTM_human, is.na(ExperimentCounts)))
 sum(is.na(PTM_human$ExperimentCounts))
 # Filter out the rows with missing peptides -- for now
 PTM_human <- subset(PTM_human, !is.na(PTM_human$ExperimentCounts))
