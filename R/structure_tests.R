@@ -83,19 +83,7 @@ ggplot(pdb_master_globular, aes(x=rsa, colour=sec_simple, linetype=is_domain)) +
 dev.off()
 
 
-# RSA and \omega ==============================================================
-plot.rsa <- function(pdb_master, main) {
-  fractions <- make.fractions(pdb_master, variables=c("buried", "tm"))
-  
-  ggplot(fractions, aes(x=buried, y=Fraction, fill=tm)) +
-    scale_fill_manual(values=c("indianred", "darkred")) +
-    geom_bar(stat="identity", position=position_dodge()) +
-    ggtitle(main) +
-    theme_bw(base_size=18)
-}
 
-plot.rsa(pdb_master, "Solvent accessibility")
-ggsave(paste(results, "RSA (transmembrane).pdf", sep="/"))
 
 # Main plot \omega breakdown ==================================================
 

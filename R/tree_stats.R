@@ -106,7 +106,7 @@ sum(trees_new$fraction.paralogs < 0.1)
 sum(trees_greg$fraction.paralogs < 0.1)
 
 ## Number of duplications
-hist(trees_new$X..of.duplications)
+hist(trees_new$X..of.duplications, breaks=100)
 
 trees_new_pf <- trees_new[order(trees_new$fraction.paralogs, decreasing=T)[1:200], ]
 trees_new_pf <- subset(trees_new, fraction.paralogs > 0.5)

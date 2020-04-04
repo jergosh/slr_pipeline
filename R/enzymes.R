@@ -13,7 +13,7 @@ head(csa)
 csa <- subset(csa, PDB.ID %in% unique(pdb_master$pdb_id))
 length(unique(subset(csa, PDB.ID %in% unique(pdb_master$pdb_id))$PDB.ID))
 
-pdb_master_csa <- subset(pdb_master_globular, pdb_id %in% unique(csa$PDB.ID))
+pdb_master_csa <- subset(slr_structure_all, pdb_id %in% unique(csa$PDB.ID))
 nrow(pdb_master_csa)
 
 csa_indices <- rep(FALSE, nrow(pdb_master_csa))
@@ -36,7 +36,7 @@ ggplot(fractions.csa, aes(x=buried, y=Fraction, fill=csa)) +
   geom_bar(stat="identity", position=position_dodge()) +
   ggtitle("Positive selection and structure") +
   theme_bw(base_size=18)
-ggsave(paste(results, "Catalytic sites.pdf", sep="/"), height=8, width=11)
+ggsave(paste(results, "catalytic_sites.pdf", sep="/"), height=8, width=11)
 
 
 csa_pos <- subset(pdb_master_csa, omega > 1 & csa == TRUE)
