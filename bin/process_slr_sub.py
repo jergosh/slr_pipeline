@@ -39,18 +39,11 @@ for aln_fn in glob(path.join(alndir, clade, "*", "*_prank.best.fas")):
     basename = path.basename(aln_fn).rpartition('_')[0]
     prefix = basename.partition('_')[0][:2]
 
-    slr_fn = path.join(slrroot, clade, prefix, basename+'_matched.res')
-    if not path.exists(slr_fn):
-        print >>sys.stderr, slr_fn, "doesn't exist!"
-        continue
-
-    print  >>sys.stderr, basename
     # TODO Make sure colspecs work in all cases
-    slr = pandas.read_fwf(open(slr_fn), colspecs=colspecs, comment="\n")
-
     # What if there are multiple human IDs in a single (split) tree? 
     # Are we allowed to potentially double count things like that?
     aln = AlignIO.read(aln_fn, 'fasta')
+
     # TODO refactor this into a function
     # One way to get around this would be to decide separately which sequences are 'of interest'
     for seqr in aln:
@@ -63,34 +56,33 @@ for aln_fn in glob(path.join(alndir, clade, "*", "*_prank.best.fas")):
                 continue
 
         all_ids.append(seqr.id)
-        print slr.shape, len(seqr.seq)/3
-        if slr.shape[0] != len(seqr.seq)/3:
-            print "Skpping", slr_fn, seqr.id
-            continue
 
-        idx = [ i for (i, codon) in enumerate(grouper(seqr.seq, 3)) if ''.join(codon) != '---' ]
-        slr_subset = copy.deepcopy(slr.ix[idx, :])
+        for subset in [ "1", "2" ]:
+            slr_fn = path.join(slrroot, clade, prefix, basename+'_'+subset+'_matched.res')
+            if not path.exists(slr_fn):
+                print slr_fn, "doesn't exist!"
+                continue
 
-        slr_subset.ix[:, 0] = idx
-        slr_subset.ix[:, 0] += 1
-        
-        slr_out = file(path.join(slrroot, clade, prefix, seqr.id + '_' + basename + '_matched.res'), 'w')
-        slr_subset.to_csv(slr_out, quoting=False, index=False, sep='\t')
-        slr_out.close()
+            slr = pandas.read_fwf(open(slr_fn), colspecs=colspecs, comment="\n")
 
-        # slr_subset.insert(0, 'dataset', pandas.Series([basename]*slr_subset.shape[0]))
-        # slr_subset.insert(0, 'stable_id', pandas.Series([seqr.id]*slr_subset.shape[0]))
-        slr_subset['dataset'] = pandas.Series([basename]*slr_subset.shape[0], index=slr_subset.index)
-        slr_subset['stable_id'] = pandas.Series([seqr.id]*slr_subset.shape[0], index=slr_subset.index)
-        slr_subset['human_idx'] = pandas.Series(range(1, slr_subset.shape[0]+1), index=slr_subset.index)
+            idx = [ i for (i, codon) in enumerate(grouper(seqr.seq, 3)) if ''.join(codon) != '---' ]
+            slr_subset = copy.deepcopy(slr.ix[idx, :])
+            slr_subset.ix[:, 0] = idx
+            slr_subset.ix[:, 0] += 1
 
-        if max(slr_subset['Pval']) > 1:
-            print >>sys.stderr, basename, max(slr_subset['Pval'])
+            slr_out = file(path.join(slrroot, clade, prefix, seqr.id + '_' + basename + '_matched.res'), 'w')
+            slr_subset.to_csv(slr_out, quoting=False, index=False, sep='\t')
 
-        all_data.append(slr_subset)
+            # slr_subset.insert(0, 'dataset', pandas.Series([basename]*slr_subset.shape[0]))
+            # slr_subset.insert(0, 'stable_id', pandas.Series([seqr.id]*slr_subset.shape[0]))
+            slr_subset['dataset'] = pandas.Series([basename+'_'+subset]*slr_subset.shape[0], index=slr_subset.index)
+            slr_subset['stable_id'] = pandas.Series([seqr.id]*slr_subset.shape[0], index=slr_subset.index)
+            slr_subset['human_idx'] = pandas.Series(range(1, slr_subset.shape[0]+1), index=slr_subset.index)
+
+            all_data.append(slr_subset)
 
 all_data = pandas.concat(all_data)
 all_data.rename(columns={"# Site": "Site"}, inplace=True)
 all_data.to_csv(slr_all, quoting=False, index=False, sep='\t')
 
-print >>sys.stderr, min(all_data["Pval"]), max(all_data["Pval"])
+print min(all_data["Pval"]), max(all_data["Pval"])

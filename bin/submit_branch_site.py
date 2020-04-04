@@ -13,6 +13,7 @@ argparser = argparse.ArgumentParser()
 argparser.add_argument('--infile', metavar="dir", type=str, required=True)
 argparser.add_argument('--dataset_map', metavar="dir", type=str, required=True)
 argparser.add_argument('--indir', metavar="dir", type=str, required=True)
+argparser.add_argument('--rerun', metavar="bool", type=bool, default=False)
 
 def main():
     args = argparser.parse_args()
@@ -40,11 +41,16 @@ def main():
         # tree_fn = path.join(dataset_dir, basename)
 
         # tree = ete2.Tree(tree_fn)
-            
+
         for sample_dir in glob.glob(path.join(dataset_dir, "*[0-9]")):
             i = path.basename(sample_dir).rpartition('_')[2]
             subset_dir = path.join(dataset_dir, dataset+'_'+i)
             
+            if args.rerun and path.exists(path.join(subset_dir, "1", "results_1.pk")) and \
+                    path.exists(path.join(subset_dir, "2", "results_2.pk")):
+                print "Skipping", subset_dir
+                continue
+
             logfile = path.join(subset_dir, 'paml.log')
 
             bsub = bsub_cmd.format(subset_dir, dataset, i)

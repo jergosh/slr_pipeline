@@ -85,7 +85,8 @@ def process_slr(df, slrroot, clade, pdbdir):
     if len(site_map) != len(ens_seqs[ens]):
         assert len(site_map) == len(ens_seqs[ens])+1
 
-    pdb_fn = path.join(pdbdir, 'pdb'+pdb_id+'.ent')
+    # pdb_fn = path.join(pdbdir, 'pdb'+pdb_id+'.ent')
+    pdb_fn = path.join(pdbdir, pdb_id)
     try:
         if not path.exists(pdb_fn):
             print "Fetching", pdb_id
@@ -140,17 +141,18 @@ def process_slr(df, slrroot, clade, pdbdir):
         omega = site_map[coord]
 
         try:
-            dssp_info = dssp_result[(pdb_chain, parse_coord(row['res_id']))]
+            res_id = str(row['res_id'])
+            dssp_info = dssp_result[(pdb_chain, parse_coord(res_id))]
             print >>outfile, '\t'.join([ ens,
                                          str(coord),
                                          uniprot,
                                          str(uniprot_coord),
-                                         pdb_id, pdb_chain, row['res_id'],
+                                         pdb_id, pdb_chain, res_id,
                                          str(dssp_info[2]),
                                          str(dssp_info[3]),
                                          str(omega) ])
         except KeyError, e:
-            print "DSSP KeyError", row['res_id']
+            print "DSSP KeyError", res_id
             dssp_missing += 1
         else:
             dssp_matched += 1
@@ -171,7 +173,7 @@ if __name__ == "__main__":
 
     print >>sys.stderr, "Loading Uniprot sequences...",
     seqs = dict()
-    with open("/nfs/research2/goldman/gregs/slr_pipeline/data/uniprot_sprot.fasta", "rU") as uniprot:
+    with open("/nfs/research1/goldman/gregs/slr_pipeline/data/uniprot_sprot.fasta", "rU") as uniprot:
         fasta = SeqIO.parse(uniprot, "fasta")
         for record in fasta:
             up = re_uniprotid.match(record.id).groups()[0]

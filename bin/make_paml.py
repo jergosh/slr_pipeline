@@ -52,7 +52,7 @@ print >>tree_file, len(aln), "1"
 print >>tree_file, tree.as_string('newick', suppress_rooting=True, 
                                   suppress_edge_lengths=args.paml,
                                   suppress_internal_taxon_labels=True,
-                                  suppres_internal_node_labels=True)
+                                  suppress_internal_node_labels=True)
 
 write_paml(MultipleSeqAlignment(aln), paml_file)
 

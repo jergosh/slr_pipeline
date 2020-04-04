@@ -23,7 +23,7 @@ args = argparser.parse_args()
 if args.treeroot:
     prank_cmd = "prank -d={} -t={} -o={} -prunetree -" + args.mode
 else:
-    prank_cmd = "prank -d={} -o={} -prunetree -codon" + args.mode
+    prank_cmd = "prank -d={} -o={} -prunetree -" + args.mode
 
 inroot = args.inroot
 treeroot = args.treeroot

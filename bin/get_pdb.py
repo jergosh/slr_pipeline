@@ -42,8 +42,10 @@ missing_file = open(args.missing_log, 'w')
 # We use the PDBe for faster transfers
 # pdbl=PDB.PDBList(server="ftp://ftp.ebi.ac.uk/pub/databases/rcsb/")
 pdbl=PDB.PDBList()
+# pdb_master = pd.read_table(open(args.pdbmap), sep="\t",
+#                            names=["stable_id", "ens_pos", "uniprot_id", "uniprot_pos", "pdb_id", "pdb_chain", "pdb_pos", "sec_str", "rsa", "omega" ])
 pdb_master = pd.read_table(open(args.pdbmap), sep="\t",
-                           names=["stable_id", "ens_pos", "uniprot_id", "uniprot_pos", "pdb_id", "pdb_chain", "pdb_pos", "sec_str", "rsa", "omega" ])
+                           names=["stable_id", "uniprot_id", "uniprot_pos", "pdb_id", "pdb_chain", "pdb_pos" ])
 
 pdb_ids = set(pdb_master.pdb_id)
 for pdbname in pdb_ids:

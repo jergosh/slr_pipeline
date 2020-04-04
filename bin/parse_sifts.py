@@ -57,6 +57,7 @@ def parse_sifts(sifts, target_id):
                       namespaces=ns)
 
     result = []
+    all_uniprot = set()
     for ent in ents:
         segments = ent.xpath("//ns:segment", namespaces=ns)
         for segment in segments:
@@ -78,6 +79,7 @@ def parse_sifts(sifts, target_id):
                 print
 
             uniprot_id = uniprot_info[0].attrib['dbAccessionId']
+            all_uniprot.add(uniprot_id)
             if uniprot_id != target_id:
                 continue
 
@@ -93,7 +95,7 @@ def parse_sifts(sifts, target_id):
                 
             result.append(segment_map)
 
-        return result
+        return result, all_uniprot
         # for seg in segments:
         #      pdb_seq3 = ''.join([ r.attrib['dbResName'] for r in seg.xpath("//ns:listResidue/ns:residue/ns:crossRefDb[@dbSource = 'PDB']", namespaces=ns) ])
         #     pdb_seq = SeqUtils.seq1(pdb_seq3)
@@ -108,29 +110,47 @@ argparser.add_argument('--clade', metavar='clade', type=str, required=True)
 argparser.add_argument('--pdbmap', metavar='pdb_map', type=str, required=True)
 argparser.add_argument('--siftsdir', metavar='sifts_dir', type=str, required=True)
 argparser.add_argument('--outfile', metavar='out_file', type=str, required=True)
+argparser.add_argument('--pdb2uniprot', metavar='uniprot_file', type=str, required=True)
 
 if __name__ == "__main__":
     args = argparser.parse_args()
 
     pdb_map_file = open(args.pdbmap)
     uniprot2pdb = defaultdict(list)
+    uniprot_file = open(args.pdb2uniprot, 'w')
+ 
+    print >>sys.stderr, "Loading Uniprot sequences...",
+    seqs = dict()
+    with open("/nfs/research2/goldman/gregs/slr_pipeline/data/uniprot_sprot.fasta", "rU") as uniprot:
+        fasta = SeqIO.parse(uniprot, "fasta")
+        for record in fasta:
+            up = re_uniprotid.match(record.id).groups()[0]
+            seqs[up] = record.seq
+    print >>sys.stderr, "done."
 
-    # for l in pdb_map_file:
     for l in list(pdb_map_file):
         f = l.rstrip().split('\t')
         ens, pdb_name, chain_name, uniprot = f[:4]
         print uniprot, pdb_name, chain_name
         sifts = get_sifts(pdb_name, args.siftsdir)
         if sifts is not None:
-            uniprot2pdb[(ens, uniprot)].extend(parse_sifts(sifts, uniprot))
+            res, all_uniprot = parse_sifts(sifts, uniprot)
+            print >>uniprot_file, '\t'.join([ pdb_name, str(len(all_uniprot)), ','.join(all_uniprot) ])
+            uniprot2pdb[(ens, uniprot)].extend(res)
 
     outfile = open(args.outfile, 'w')
 
     for ids, segments in uniprot2pdb.items():
         ens, uniprot = ids
+
+        if uniprot not in seqs:
+            print >>sys.stderr, "Uniprot sequence missing"
+            continue
+
         pdb_map = {}
         segments.sort(key=len, reverse=True)
         for segment in segments:
+            # Check for overlaps first and only then keep the chain ?
             for res in segment.items():
                 if res[0] not in pdb_map:
                     pdb_map[res[0]] = res[1]
@@ -140,4 +160,3 @@ if __name__ == "__main__":
             pdb_id, pdb_chain, res_id = pdb_info
 
             print >>outfile, '\t'.join([ ens, uniprot, str(uniprot_coord) ] + pdb_info)
-
